@@ -10,6 +10,10 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@kaspersky/hexa-ui": "^6.387.4",
+    "@kaspersky/hexa-ui-charts": "^1.50.0",
+    "@kaspersky/hexa-ui-core": "^0.21.0",
+    "@kaspersky/hexa-ui-icons": "^2.19.0",
     "react": "^19.2.8",
     "react-dom": "^19.2.8"
   },
