@@ -1,14 +1,10 @@
 import './App.css'
-import { Button } from '@kaspersky/hexa-ui'
+import FormRendererJson from './pages/registration/Form'
 
 function App() {
   return (
     <>
-      <Button
-        text='Click me!'
-        mode='secondary'
-        size='large'
-      />
+      <FormRendererJson />
     </>
   )
 }

@@ -14,10 +14,16 @@
     "@kaspersky/hexa-ui-charts": "^1.50.0",
     "@kaspersky/hexa-ui-core": "^0.21.0",
     "@kaspersky/hexa-ui-icons": "^2.19.0",
+    "@reformer/cdk": "^11.1.0",
+    "@reformer/core": "^10.1.0",
+    "@reformer/renderer-json": "^10.1.0",
+    "@reformer/renderer-react": "^10.1.0",
+    "@reformer/ui-kit": "^12.1.0",
     "react": "^19.2.8",
     "react-dom": "^19.2.8"
   },
   "devDependencies": {
+    "@reformer/builder": "^1.0.0",
     "@types/node": "^24.13.3",
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
