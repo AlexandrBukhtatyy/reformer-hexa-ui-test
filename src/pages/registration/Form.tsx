@@ -1,36 +1,24 @@
 /**
  * Форма «registration» на @reformer/renderer-json + @kaspersky/hexa-ui.
  *
- * Обязанности разведены по соседним файлам — здесь только сборка:
+ * Обязанности разведены по соседним файлам:
  * - [form.json]      — весь layout (может прийти строкой с сервера);
  * - [model.ts]       — тип данных и initial-значения;
  * - [validation.ts]  — правила значений (в JSON-DSL валидаторов нет), гоняются `validateModel`;
  * - [behavior.ts]    — реактивность модели (`createForm({ behavior })`);
  * - [ui.ts]          — render-behavior поверх дерева рендера (hideWhen/patchProps/onInit).
  *
- * Реестр и мост к hexa-ui живут здесь: JSON знает только имена (`$component(Input)`),
- * а какой это React-компонент — решает приложение.
+ * Провайдеры и мост к hexa-ui — в `layouts/FormLayout` и `libs/hexa-ui`: страница про них не знает.
+ * Вся сборка и поведение — в `useRegistrationForm`; компонент остаётся чистым представлением.
  */
 
-import { useMemo, useState, type ReactElement } from 'react';
-import { createForm, createModel, useFormControlValue } from '@reformer/core';
+import { useMemo, useRef, useState } from 'react';
+import { createForm, createModel, useFormControlValue, type FieldNode } from '@reformer/core';
 import { validateModel } from '@reformer/core/validation';
-import { ValidationMessagesProvider, type ValidationErrorResolver } from '@reformer/cdk';
-import { useFormField } from '@reformer/cdk/form-field';
-import { Button, Field, Textbox } from '@kaspersky/hexa-ui';
-import {
-  FIELD_WRAPPER,
-  JsonFormRenderer,
-  JsonRendererProvider,
-  convertJsonToM1Tree,
-  defineRegistry,
-  type JsonFormSchema,
-} from '@reformer/renderer-json';
-import type {
-  FieldAdapter,
-  FieldWrapperProps,
-  RendererSettings,
-} from '@reformer/renderer-react';
+import { Button } from '@kaspersky/hexa-ui';
+import { JsonFormRenderer, convertJsonToM1Tree, type JsonFormSchema } from '@reformer/renderer-json';
+import { FormLayout } from '../../layouts/FormLayout';
+import { hexaRegistry } from '../../libs/hexa-ui';
 import rawJsonSchema from './form.json';
 import { formBehavior } from './behavior';
 import { initialFormModel, type FormShape } from './model';
@@ -41,99 +29,60 @@ import { formValidation } from './validation';
 // «схема пришла строкой с сервера».
 const registrationJsonSchema = rawJsonSchema as unknown as JsonFormSchema;
 
-/**
- * Системная обёртка поля (`FIELD_WRAPPER`): рендерер отдаёт сюда ноду формы и уже отрисованный
- * контрол, а label/ошибку берём из ноды и раскладываем в hexa-ui `<Field>`.
- */
-function HexaField({ control, className, testId, children }: FieldWrapperProps) {
-  const { state } = useFormField(control);
-
-  return (
-    <Field
-      className={className}
-      label={state.label}
-      labelPosition="top"
-      required={state.required}
-      control={children as ReactElement}
-      message={state.shouldShowError ? state.error : undefined}
-      messageMode="error"
-      testId={testId}
-    />
-  );
+interface FormStatus {
+  kind: 'success' | 'error';
+  text: string;
 }
 
 /**
- * `Textbox` — уже value-based (`value` + `onChange(value)`), поэтому переклад seam'а не нужен.
- * Адаптер здесь ради двух вещей: он не подмешивает в контрол проп `control` (ноду формы) и
- * снимает `label` — его рисует обёртка, а в antd-input он утёк бы атрибутом в DOM.
+ * Всё, что нужно форме, кроме её внешнего вида: модель, ноды, состояние отправки и обработчики.
+ * Компонент вызывает хук и только раскладывает результат по разметке.
  */
-const TEXTBOX_ADAPTER: FieldAdapter = { strip: ['label'] };
+function useRegistrationForm() {
+  // Один раз: пересборка создала бы новую модель, и форма теряла бы введённое на каждый рендер.
+  const { model, form } = useMemo(() => {
+    const model = createModel<FormShape>({ ...initialFormModel });
+    // Форма строится из ТОЙ ЖЕ JSON-схемы: конвертер биндит листья к сигналам модели.
+    // Без этого вызова рендерер не найдёт ноду для сигнала и не отрисует поля.
+    const form = createForm<FormShape>({
+      model,
+      schema: convertJsonToM1Tree(registrationJsonSchema, hexaRegistry, model),
+      behavior: formBehavior,
+    });
 
-/**
- * Тексты ошибок по кодам валидаторов. Валидаторы из `@reformer/core/validators` без явного
- * `message` кладут в ошибку пустую строку либо `'invalid'` — без таблицы поле показало бы
- * пользователю именно это.
- */
-const VALIDATION_MESSAGES: Record<string, (params?: Record<string, unknown>) => string> = {
-  required: () => 'Обязательное поле',
-  email: () => 'Введите корректный email',
-  minLength: (p) => `Минимум ${p?.minLength} символов`,
-  maxLength: (p) => `Максимум ${p?.maxLength} символов`,
-};
+    return { model, form };
+  }, []);
 
-/**
- * Явный текст из validation.ts (`required({ message: 'Укажите имя' })`) важнее таблицы, поэтому
- * готовый `createMessageResolver` не подходит: он ключуется по коду и такой текст бы перетёр.
- */
-const resolveValidationMessage: ValidationErrorResolver = (error) => {
-  const explicit = error.message && error.message !== 'invalid' ? error.message : undefined;
-  return explicit ?? VALIDATION_MESSAGES[error.code]?.(error.params) ?? error.code;
-};
+  const [status, setStatus] = useState<FormStatus | null>(null);
+  const [pending, setPending] = useState(false);
+  // Флаг дублируется в ref: два клика в одном кадре придут из одного рендера, где `pending`
+  // ещё false, — на одном state такую пару не отсечь.
+  const pendingRef = useRef(false);
 
-const resolveFieldAdapter: NonNullable<RendererSettings['resolveFieldAdapter']> = (component) =>
-  component === Textbox ? TEXTBOX_ADAPTER : undefined;
+  const submit = async (): Promise<void> => {
+    if (pendingRef.current) return;
+    pendingRef.current = true;
+    setPending(true);
 
-/**
- * Сборка модели, формы и реестра. Без React-хуков — компонент зовёт её один раз в `useMemo`:
- * повторная сборка создала бы новый реестр и новые типы компонентов, и React ремонтировал бы
- * поддерево на каждый рендер.
- */
-function createSetup() {
-  const registry = defineRegistry((reg) => {
-    // Имя из схемы → компонент hexa-ui.
-    reg.component('Input', Textbox);
-    // Обёртка полей: label + сообщение об ошибке вокруг каждого листа.
-    reg.component(FIELD_WRAPPER, HexaField);
-  });
-
-  const model = createModel<FormShape>({ ...initialFormModel });
-  // Форма строится из ТОЙ ЖЕ JSON-схемы: конвертер биндит листья к сигналам модели.
-  // Без этого вызова рендерер не найдёт ноду для сигнала и не отрисует поля.
-  const form = createForm<FormShape>({
-    model,
-    schema: convertJsonToM1Tree(registrationJsonSchema, registry, model),
-    behavior: formBehavior,
-  });
-
-  return { model, form, registry, renderBehavior: formUiBehavior };
-}
-
-export default function FormRendererJson() {
-  const { model, form, registry, renderBehavior } = useMemo(() => createSetup(), []);
-  const [status, setStatus] = useState<string | null>(null);
-
-  // greeting в схеме нет — его считает behavior.ts из name. Нода всё равно существует:
-  // FormProxy заводит её лениво по полю модели, поэтому доступен обычный хук ядра.
-  const greeting = useFormControlValue(form.greeting);
-
-  const handleSubmit = async (): Promise<void> => {
-    // Без touched ноды не показывают ошибки — невалидные поля молча не отправились бы.
-    form.markAsTouched();
-    const valid = await validateModel(model, formValidation);
-    setStatus(valid ? `Отправлено: ${JSON.stringify(model.get())}` : 'Проверьте выделенные поля');
+    try {
+      // Без touched ноды не показывают ошибки — невалидные поля молча не отправились бы.
+      form.markAsTouched();
+      const valid = await validateModel(model, formValidation);
+      setStatus(
+        valid
+          ? { kind: 'success', text: 'Форма отправлена' }
+          : { kind: 'error', text: 'Проверьте выделенные поля' },
+      );
+    } finally {
+      pendingRef.current = false;
+      setPending(false);
+    }
   };
 
-  const handleReset = (): void => {
+  const reset = (): void => {
+    // Тот же guard, что у submit: иначе хвост незавершённой отправки поставил бы статус
+    // уже после очистки, и на пустой форме повисло бы «Проверьте выделенные поля».
+    if (pendingRef.current) return;
     // Значения принадлежат модели, UI-состояние — форме: чистим порознь.
     model.reset();
     form.clearErrors();
@@ -141,22 +90,54 @@ export default function FormRendererJson() {
     setStatus(null);
   };
 
+  return { model, greetingField: form.greeting, status, pending, submit, reset };
+}
+
+/**
+ * Отдельный компонент — чтобы пересчёт greeting (а он идёт на каждый символ в «Имя»)
+ * перерисовывал только эту строку, а не всю страницу вместе с полями формы.
+ */
+function Greeting({ control }: { control: FieldNode<string> }) {
+  const greeting = useFormControlValue(control);
+
+  return greeting ? <p>{greeting}</p> : null;
+}
+
+export default function Form() {
+  const { model, greetingField, status, pending, submit, reset } = useRegistrationForm();
+
   return (
-    <ValidationMessagesProvider resolver={resolveValidationMessage}>
-      <JsonRendererProvider settings={{ registry, model, resolveFieldAdapter }}>
-        <JsonFormRenderer<FormShape>
-          schema={registrationJsonSchema}
-          renderBehavior={renderBehavior}
-          validate={import.meta.env.DEV}
+    <FormLayout model={model}>
+      <JsonFormRenderer<FormShape>
+        schema={registrationJsonSchema}
+        renderBehavior={formUiBehavior}
+        validate={import.meta.env.DEV}
+      />
+
+      <Greeting control={greetingField} />
+
+      <div className="flex gap-4 mt-4">
+        <Button
+          text="Отправить"
+          mode="primary"
+          loading={pending}
+          disabled={pending}
+          onClick={() => void submit()}
         />
+        <Button text="Очистить" mode="secondary" disabled={pending} onClick={reset} />
+      </div>
 
-        {greeting && <p>{greeting}</p>}
-
-        <Button text="Отправить" mode="primary" onClick={() => void handleSubmit()} />
-        <Button text="Очистить" mode="secondary" onClick={handleReset} />
-
-        {status && <p>{status}</p>}
-      </JsonRendererProvider>
-    </ValidationMessagesProvider>
+      {/* Живой регион присутствует всегда: скринридер объявляет появившийся текст только
+          если сам контейнер уже был в DOM к моменту вставки. */}
+      <p
+        role="status"
+        aria-live="polite"
+        className={`mt-4 min-h-6 text-sm ${
+          status?.kind === 'error' ? 'text-red-700' : 'text-emerald-700'
+        }`}
+      >
+        {status?.text ?? ''}
+      </p>
+    </FormLayout>
   );
 }

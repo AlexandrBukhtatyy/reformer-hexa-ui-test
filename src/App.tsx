@@ -1,10 +1,10 @@
 import './App.css'
-import FormRendererJson from './pages/registration/Form'
+import RegistrationForm from './pages/registration/Form'
 
 function App() {
   return (
     <>
-      <FormRendererJson />
+      <RegistrationForm />
     </>
   )
 }

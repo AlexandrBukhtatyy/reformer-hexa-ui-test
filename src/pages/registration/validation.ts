@@ -75,9 +75,17 @@ export const formValidation = defineValidationSchema<FormShape>(({ model }) => {
   //   validate(item.$.income, [isNumber(), min(0)]);
   // });
 
-  // Async (проверка на сервере):
+  // Async (проверка на сервере). ВАЖНО: исключение из правила наружу НЕ выходит —
+  // `validateModel` вернёт true, и упавшая проверка молча зачтётся как пройденная.
+  // Поэтому ошибку запроса ловим сами и роутим явным кодом:
   // validateAsync(model.$.login, [
-  //   async (value) => ((await isLoginTaken(value)) ? { code: 'taken', message: 'Логин занят' } : null),
+  //   async (value) => {
+  //     try {
+  //       return (await isLoginTaken(value)) ? { code: 'taken', message: 'Логин занят' } : null;
+  //     } catch {
+  //       return { code: 'checkFailed', message: 'Не удалось проверить логин, попробуйте ещё раз' };
+  //     }
+  //   },
   // ]);
 
   // Композиция под-схем (например, по шагам):

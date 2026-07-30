@@ -10,7 +10,7 @@
       {
         "selector": "name",
         "value": "$model(name)",
-        "component": "$component(Input)",
+        "component": "$component(Textbox)",
         "componentProps": {
           "label": "Имя"
         }
@@ -18,7 +18,7 @@
       {
         "selector": "email",
         "value": "$model(email)",
-        "component": "$component(Input)",
+        "component": "$component(Textbox)",
         "componentProps": {
           "label": "Email",
           "type": "email"
