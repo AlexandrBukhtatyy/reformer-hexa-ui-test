@@ -107,11 +107,12 @@ export default function Form() {
   const { model, greetingField, status, pending, submit, reset } = useRegistrationForm();
 
   return (
-    <FormLayout model={model}>
+    <FormLayout>
       <JsonFormRenderer<FormShape>
         schema={registrationJsonSchema}
+        model={model}
         renderBehavior={formUiBehavior}
-        validate={import.meta.env.DEV}
+        validateSchema={import.meta.env.DEV}
       />
 
       <Greeting control={greetingField} />

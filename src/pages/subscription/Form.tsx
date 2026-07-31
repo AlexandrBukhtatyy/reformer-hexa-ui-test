@@ -98,11 +98,12 @@ export default function Form() {
   const { model, status, uiBehavior } = useSubscriptionForm();
 
   return (
-    <FormLayout model={model}>
+    <FormLayout>
       <JsonFormRenderer<FormShape>
         schema={subscriptionJsonSchema}
+        model={model}
         renderBehavior={uiBehavior}
-        validate={import.meta.env.DEV}
+        validateSchema={import.meta.env.DEV}
       />
 
       {/* Живой регион присутствует всегда: скринридер объявляет появившийся текст только
