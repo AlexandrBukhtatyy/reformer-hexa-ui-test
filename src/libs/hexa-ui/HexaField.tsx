@@ -38,3 +38,15 @@ export function HexaField({ control, className, testId, children }: FieldWrapper
  * снимает `label` — его рисует обёртка, а в antd-input он утёк бы атрибутом в DOM.
  */
 export const TEXTBOX_ADAPTER: FieldAdapter = { strip: ['label'] };
+
+/**
+ * `Radio` — это antd `Radio.Group`: значение он отдаёт не аргументом, а DOM-событием
+ * (`onChange(event)`). Без перевода в модель уехал бы сам объект события.
+ *
+ * Тип события берём структурно, чтобы не тянуть в приложение прямую зависимость от antd
+ * (он приходит транзитивно через hexa-ui).
+ */
+export const RADIO_ADAPTER: FieldAdapter = {
+  fromEmit: (event) => (event as { target?: { value?: unknown } }).target?.value,
+  strip: ['label'],
+};
