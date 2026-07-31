@@ -1,32 +1,44 @@
-# React + TypeScript + Vite
+# reformer-hexa-ui
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+Формы из JSON-схем на `@reformer/renderer-json` поверх дизайн-системы `@kaspersky/hexa-ui`:
+страница регистрации и многошаговая заявка (wizard). Обе собраны из одного реестра компонентов —
+схема несёт только layout, валидация и поведение живут отдельными TS-модулями.
 
-Currently, two official plugins are available:
+## Демо
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+[![Open in StackBlitz](https://developer.stackblitz.com/img/open_in_stackblitz.svg)](https://stackblitz.com/github/AlexandrBukhtatyy/reformer-hexa-ui-test)
 
-## React Compiler
+<https://stackblitz.com/github/AlexandrBukhtatyy/reformer-hexa-ui-test>
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+Зависимости ставятся и дев-сервер поднимается сами: `.stackblitzrc` запускает `npm start`.
 
-## Expanding the Oxlint configuration
+## Локальный запуск
 
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
-
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
+```bash
+npm start        # установка зависимостей + vite dev
 ```
 
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+Дальше — `npm run dev`, `npm run build`, `npm run lint`.
+
+`legacy-peer-deps` включён в `.npmrc` намеренно: hexa-ui тянет antd 4, который в peerDependencies
+просит React 16/17, а проект на React 19 — без флага установка падает с ERESOLVE.
+
+## Структура
+
+| Путь | Что внутри |
+| --- | --- |
+| [src/libs/hexa-ui/](src/libs/hexa-ui/) | мост @reformer ↔ hexa-ui: реестр компонентов, адаптеры контролов, обёртка поля, тексты ошибок |
+| [src/layouts/FormLayout.tsx](src/layouts/FormLayout.tsx) | глобальные провайдеры рендерера и сообщений валидации |
+| [src/pages/registration/](src/pages/registration/) | простая форма |
+| [src/pages/subscription/](src/pages/subscription/) | wizard из трёх шагов со всеми компонентами реестра |
+
+Каждая страница разложена одинаково: `form.json` — layout, `model.ts` — данные, `validation.ts` —
+правила над моделью, `behavior.ts` — реактивные связи, `ui.ts` — render-behavior, `Form.tsx` — сборка.
+
+## Реестр компонентов
+
+Имена для `$component(...)` — [src/libs/hexa-ui/registry.ts](src/libs/hexa-ui/registry.ts):
+`Textbox`, `Radio`, `Wizard`, `Step`, `Card`, `SectionMessage`, `Text`, `Heading`.
+
+Три из них подключены через адаптеры: `Wizard` (шаги-ноды JSON → `steps` c `render()`),
+`Card` (строковый заголовок → объект hexa-ui) и `Radio` (antd-группа отдаёт значение DOM-событием).
