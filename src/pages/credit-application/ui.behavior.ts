@@ -16,7 +16,7 @@
  * текстом владеет страница, она же показывает его в live-регионе.
  */
 
-import type { FormModel, FormProxy } from '@reformer/core';
+import type { FormModel, FormProxy } from "@reformer/core";
 import {
   hideWhen,
   onComponentEvent,
@@ -24,15 +24,19 @@ import {
   onMount,
   renderEffect,
   type RenderBehaviorFn,
-} from '@reformer/renderer-react';
-import type { HexaWizardHandle } from '../../libs/hexa-ui';
-import { fetchCreditApplication, fetchDictionaries, submitCreditApplication } from './api';
-import type { CreditApplicationForm } from './types';
-import { makeCreditValidationConfig } from './validation';
+} from "@reformer/renderer-react";
+import type { HexaWizardHandle } from "../../libs/hexa-ui";
+import {
+  fetchCreditApplication,
+  fetchDictionaries,
+  submitCreditApplication,
+} from "./api";
+import type { CreditApplicationForm } from "./form.types";
+import { makeCreditValidationConfig } from "./validation";
 
 /** Результат отправки заявки. `pending` — нейтральный: у мока секунда задержки. */
 export interface CreditFormStatus {
-  kind: 'pending' | 'success' | 'error';
+  kind: "pending" | "success" | "error";
   text: string;
 }
 
@@ -47,7 +51,7 @@ export interface CreditUiBehaviorDeps {
 }
 
 /** Идентификатор заявки захардкожен так же, как в источнике: демо грузит одну и ту же анкету. */
-const APPLICATION_ID = '1';
+const APPLICATION_ID = "1";
 
 export function createCreditUiBehavior({
   model,
@@ -55,8 +59,8 @@ export function createCreditUiBehavior({
   onStatus,
 }: CreditUiBehaviorDeps): RenderBehaviorFn<CreditApplicationForm> {
   return (schema) => {
-    const wizard = schema.node('wizard');
-    const boundary = schema.node('data-boundary');
+    const wizard = schema.node("wizard");
+    const boundary = schema.node("data-boundary");
     // Ref — единственный способ дотянуться до навигации визарда: шагом владеет он сам.
     const wizardRef = wizard.getRef<HexaWizardHandle>();
 
@@ -72,39 +76,46 @@ export function createCreditUiBehavior({
 
     // ── Загрузка заявки: состоянием владеет нода AsyncBoundary ──────────────
     const loadApplication = async (): Promise<void> => {
-      boundary.patchProps({ status: 'loading', error: null });
+      boundary.patchProps({ status: "loading", error: null });
 
       try {
         const [app, dict] = await Promise.all([
           fetchCreditApplication(APPLICATION_ID),
           fetchDictionaries(),
         ]);
-        if (app.status !== 200) throw new Error('Ошибка загрузки заявки');
-        if (dict.status !== 200) throw new Error('Ошибка загрузки справочников');
+        if (app.status !== 200) throw new Error("Ошибка загрузки заявки");
+        if (dict.status !== 200)
+          throw new Error("Ошибка загрузки справочников");
 
         form.patchValue(app.data);
 
         // queueMicrotask обязателен: `updateComponentProps` в одном тике с `patchValue` попадает
         // внутрь ещё не слитых реактивных эффектов, и preact бросает «Cycle detected».
         queueMicrotask(() => {
-          form.registrationAddress.city.updateComponentProps({ options: dict.data.cities });
-          form.residenceAddress.city.updateComponentProps({ options: dict.data.cities });
+          form.registrationAddress.city.updateComponentProps({
+            options: dict.data.cities,
+          });
+          form.residenceAddress.city.updateComponentProps({
+            options: dict.data.cities,
+          });
           // forEach у массива отдаёт НОДУ элемента (FormProxy), а не его значение.
           form.properties.forEach((property) => {
-            property.type.updateComponentProps({ options: dict.data.propertyTypes });
+            property.type.updateComponentProps({
+              options: dict.data.propertyTypes,
+            });
           });
           form.existingLoans.forEach((loan) => {
             loan.bank.updateComponentProps({ options: dict.data.banks });
           });
         });
 
-        boundary.patchProps({ status: 'ready' });
+        boundary.patchProps({ status: "ready" });
       } catch (e) {
         // Текст ошибки уходит прямо в пропы: причина сбоя (заявка или справочники) иначе
         // до пользователя не доедет — в слоте загрузки он был бы захардкожен.
         boundary.patchProps({
-          status: 'error',
-          error: e instanceof Error ? e.message : 'Неизвестная ошибка',
+          status: "error",
+          error: e instanceof Error ? e.message : "Неизвестная ошибка",
           onRetry: () => void loadApplication(),
         });
       }
@@ -119,7 +130,7 @@ export function createCreditUiBehavior({
     // Эффект идёт после mount, поэтому ref уже заполнен; повторный переход на текущий шаг
     // React схлопывает сам — зацикливания на каждое изменение сигнала не будет.
     renderEffect(schema, () => {
-      if (form.loanType.value.value === 'mortgage') {
+      if (form.loanType.value.value === "mortgage") {
         wizardRef.current?.goToStep(1);
       }
     });
@@ -127,51 +138,82 @@ export function createCreditUiBehavior({
     // ── Шаг 1: тип кредита ──────────────────────────────────────────────────
     // Скрытие — только половина дела: скрытые поля продолжают валидироваться и уезжать в payload.
     // Вторую половину (disable + reset/clear) делает `behavior.ts`; обе нужны вместе.
-    hideWhen(schema.node('mortgage-section'), () => form.loanType.value.value !== 'mortgage');
-    hideWhen(schema.node('car-section'), () => form.loanType.value.value !== 'car');
+    hideWhen(
+      schema.node("mortgage-section"),
+      () => form.loanType.value.value !== "mortgage",
+    );
+    hideWhen(
+      schema.node("car-section"),
+      () => form.loanType.value.value !== "car",
+    );
 
     // ── Шаг 3: адреса ───────────────────────────────────────────────────────
     hideWhen(
-      schema.node('residence-address-section'),
+      schema.node("residence-address-section"),
       () => form.sameAsRegistration.value.value === true,
     );
 
     // ── Шаг 4: занятость ────────────────────────────────────────────────────
-    hideWhen(schema.node('employer-section'), () => form.employmentStatus.value.value !== 'employed');
     hideWhen(
-      schema.node('business-section'),
-      () => form.employmentStatus.value.value !== 'selfEmployed',
+      schema.node("employer-section"),
+      () => form.employmentStatus.value.value !== "employed",
     );
-    hideWhen(schema.node('income-section'), () => form.employmentStatus.value.value === 'unemployed');
     hideWhen(
-      schema.node('unemployed-warning'),
-      () => form.employmentStatus.value.value !== 'unemployed',
+      schema.node("business-section"),
+      () => form.employmentStatus.value.value !== "selfEmployed",
+    );
+    hideWhen(
+      schema.node("income-section"),
+      () => form.employmentStatus.value.value === "unemployed",
+    );
+    hideWhen(
+      schema.node("unemployed-warning"),
+      () => form.employmentStatus.value.value !== "unemployed",
     );
 
     // ── Шаг 5: дополнительные секции ────────────────────────────────────────
-    hideWhen(schema.node('properties-array'), () => !form.hasProperty.value.value);
-    hideWhen(schema.node('existing-loans-array'), () => !form.hasExistingLoans.value.value);
-    hideWhen(schema.node('co-borrowers-array'), () => !form.hasCoBorrower.value.value);
+    hideWhen(
+      schema.node("properties-array"),
+      () => !form.hasProperty.value.value,
+    );
+    hideWhen(
+      schema.node("existing-loans-array"),
+      () => !form.hasExistingLoans.value.value,
+    );
+    hideWhen(
+      schema.node("co-borrowers-array"),
+      () => !form.hasCoBorrower.value.value,
+    );
 
     // ── Шаг 6: отправка ─────────────────────────────────────────────────────
     // `onSubmit` — проп-событие моста: hexa-ui `onFinish` зовётся без аргументов, а значения
     // нужны здесь. Мост зовёт его снимком формы после успешного `validateAll`.
-    onComponentEvent(wizard, 'onSubmit', async (values: CreditApplicationForm) => {
-      onStatus({ kind: 'pending', text: 'Отправляем заявку…' });
+    onComponentEvent(
+      wizard,
+      "onSubmit",
+      async (values: CreditApplicationForm) => {
+        onStatus({ kind: "pending", text: "Отправляем заявку…" });
 
-      try {
-        const response = await submitCreditApplication(values);
-        if (response.status === 200 || response.status === 201) {
+        try {
+          const response = await submitCreditApplication(values);
+          if (response.status === 200 || response.status === 201) {
+            onStatus({
+              kind: "success",
+              text: `Заявка успешно отправлена! ID: ${response.data.id}`,
+            });
+          } else {
+            onStatus({
+              kind: "error",
+              text: "Ошибка отправки заявки: сервер вернул неожиданный ответ",
+            });
+          }
+        } catch {
           onStatus({
-            kind: 'success',
-            text: `Заявка успешно отправлена! ID: ${response.data.id}`,
+            kind: "error",
+            text: "Ошибка отправки заявки: сервер недоступен",
           });
-        } else {
-          onStatus({ kind: 'error', text: 'Ошибка отправки заявки: сервер вернул неожиданный ответ' });
         }
-      } catch {
-        onStatus({ kind: 'error', text: 'Ошибка отправки заявки: сервер недоступен' });
-      }
-    });
+      },
+    );
   };
 }

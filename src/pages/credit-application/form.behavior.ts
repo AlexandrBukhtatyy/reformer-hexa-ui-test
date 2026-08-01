@@ -21,8 +21,13 @@ import {
   transformValue,
   apply,
   type ReadonlySignal,
-} from '@reformer/core/behaviors';
-import type { Address, CoBorrower, CreditApplicationForm, PersonalData } from './types';
+} from "@reformer/core/behaviors";
+import type {
+  Address,
+  CoBorrower,
+  CreditApplicationForm,
+  PersonalData,
+} from "./form.types";
 import {
   computeAge,
   computeCoBorrowersIncome,
@@ -32,8 +37,8 @@ import {
   computeMonthlyPayment,
   computePaymentRatio,
   computeTotalIncome,
-} from './compute';
-import { fetchCarModels, fetchCities } from './api';
+} from "./compute";
+import { fetchCarModels, fetchCities } from "./api";
 
 // =====================================================================================
 // 0. Пользовательские операторы
@@ -98,7 +103,10 @@ export function loadOptionsOn<TValue, TOption>(
 }
 
 /** Очистить массив-ноду при снятии булева флага. */
-export function clearWhenOff(flag: ReadonlySignal<boolean>, array: Clearable): void {
+export function clearWhenOff(
+  flag: ReadonlySignal<boolean>,
+  array: Clearable,
+): void {
   onChange(flag, (on) => {
     if (!on) array.clear();
   });
@@ -108,21 +116,25 @@ export function clearWhenOff(flag: ReadonlySignal<boolean>, array: Clearable): v
 // 1. Под-схема адреса — переиспользуется для адреса регистрации и адреса проживания
 // =====================================================================================
 
-export const addressBehavior = defineFormBehavior<Address>(({ model, form }) => {
-  // Подгрузка городов по региону. Город НЕ сбрасываем (region выставляется раньше city при загрузке;
-  // поле «Город» — обычный Input, список носит вспомогательный характер).
-  loadOptionsOn(model.$.region, form.city, fetchCities);
+export const addressBehavior = defineFormBehavior<Address>(
+  ({ model, form }) => {
+    // Подгрузка городов по региону. Город НЕ сбрасываем (region выставляется раньше city при загрузке;
+    // поле «Город» — обычный Input, список носит вспомогательный характер).
+    loadOptionsOn(model.$.region, form.city, fetchCities);
 
-  // Автоформат почтового индекса (только цифры, ≤ 6).
-  transformValue(model.$.postalCode, (pc) => (pc ?? '').replace(/\D/g, '').slice(0, 6));
-});
+    // Автоформат почтового индекса (только цифры, ≤ 6).
+    transformValue(model.$.postalCode, (pc) =>
+      (pc ?? "").replace(/\D/g, "").slice(0, 6),
+    );
+  },
+);
 
 // =====================================================================================
 // 2. Поведение кредитной заявки
 // =====================================================================================
 
-export const creditApplicationBehavior = defineFormBehavior<CreditApplicationForm>(
-  ({ model, form }) => {
+export const creditApplicationBehavior =
+  defineFormBehavior<CreditApplicationForm>(({ model, form }) => {
     // ===================================================================
     // 1. compute — вычисляемые поля (auto-tracking)
     //
@@ -143,11 +155,15 @@ export const creditApplicationBehavior = defineFormBehavior<CreditApplicationFor
     compute(model.$.monthlyPayment, () => computeMonthlyPayment(model));
     // Первоначальный взнос (20% стоимости) — только для ипотеки
     compute(model.$.initialPayment, () => computeInitialPayment(model), {
-      when: () => model.loanType === 'mortgage',
+      when: () => model.loanType === "mortgage",
     });
     compute(model.$.fullName, () => computeFullName(model));
     compute(model.$.age, () =>
-      computeAge({ personalData: { birthDate: model.personalData.birthDate } as PersonalData }),
+      computeAge({
+        personalData: {
+          birthDate: model.personalData.birthDate,
+        } as PersonalData,
+      }),
     );
     compute(model.$.coBorrowersIncome, () =>
       computeCoBorrowersIncome({
@@ -164,7 +180,9 @@ export const creditApplicationBehavior = defineFormBehavior<CreditApplicationFor
     // ===================================================================
     // 2. copyFrom — копирование значений (скаляр + группа)
     // ===================================================================
-    copyFrom(model.$.email, model.$.emailAdditional, { when: () => model.sameEmail === true });
+    copyFrom(model.$.email, model.$.emailAdditional, {
+      when: () => model.sameEmail === true,
+    });
     copyFrom(model.$.registrationAddress, model.$.residenceAddress, {
       when: () => model.sameAsRegistration === true,
     });
@@ -177,14 +195,14 @@ export const creditApplicationBehavior = defineFormBehavior<CreditApplicationFor
     // ===================================================================
     enableWhen(
       [model.$.propertyValue, model.$.initialPayment],
-      () => model.loanType === 'mortgage',
+      () => model.loanType === "mortgage",
       {
         resetOnDisable: true,
       },
     );
     enableWhen(
       [model.$.carBrand, model.$.carModel, model.$.carYear, model.$.carPrice],
-      () => model.loanType === 'car',
+      () => model.loanType === "car",
       { resetOnDisable: true },
     );
     enableWhen(
@@ -195,34 +213,43 @@ export const creditApplicationBehavior = defineFormBehavior<CreditApplicationFor
         model.$.companyAddress,
         model.$.position,
       ],
-      () => model.employmentStatus === 'employed',
+      () => model.employmentStatus === "employed",
       { resetOnDisable: true },
     );
     enableWhen(
       [model.$.businessType, model.$.businessInn, model.$.businessActivity],
-      () => model.employmentStatus === 'selfEmployed',
+      () => model.employmentStatus === "selfEmployed",
       { resetOnDisable: true },
     );
     // Адрес проживания — группа: enable/disable без сброса (значение копируется из адреса регистрации)
-    enableWhen(model.$.residenceAddress, () => model.sameAsRegistration === false);
+    enableWhen(
+      model.$.residenceAddress,
+      () => model.sameAsRegistration === false,
+    );
 
     // ===================================================================
     // 4. Реакции — загрузка справочников / лимиты / очистка массивов
     // ===================================================================
-    loadOptionsOn(model.$.carBrand, form.carModel, fetchCarModels, { resetTarget: true });
+    loadOptionsOn(model.$.carBrand, form.carModel, fetchCarModels, {
+      resetTarget: true,
+    });
 
     // Максимальная сумма кредита от дохода (≤ 10 годовых, не более 10 млн).
     // onChange по умолчанию не immediate — на маунте лимит не применяется, стартовый max берётся
     // из статических componentProps в form.json.
     onChange(model.$.totalIncome, (totalIncome) => {
       if (totalIncome && totalIncome > 0) {
-        form.loanAmount.updateComponentProps({ max: Math.min(totalIncome * 12 * 10, 10_000_000) });
+        form.loanAmount.updateComponentProps({
+          max: Math.min(totalIncome * 12 * 10, 10_000_000),
+        });
       }
     });
     // Максимальный срок с учётом возраста (погашение до 70 лет)
     onChange(model.$.age, (age) => {
       if (age && age >= 18) {
-        form.loanTerm.updateComponentProps({ max: Math.min(Math.max(70 - age, 1) * 12, 240) });
+        form.loanTerm.updateComponentProps({
+          max: Math.min(Math.max(70 - age, 1) * 12, 240),
+        });
       }
     });
 
@@ -233,6 +260,8 @@ export const creditApplicationBehavior = defineFormBehavior<CreditApplicationFor
     // ===================================================================
     // 5. Под-схема адреса — на оба адреса
     // ===================================================================
-    apply([model.$.registrationAddress, model.$.residenceAddress], addressBehavior);
-  },
-);
+    apply(
+      [model.$.registrationAddress, model.$.residenceAddress],
+      addressBehavior,
+    );
+  });

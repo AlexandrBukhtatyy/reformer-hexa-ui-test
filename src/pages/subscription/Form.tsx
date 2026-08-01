@@ -19,9 +19,9 @@ import { JsonFormRenderer, convertJsonToM1Tree, type JsonFormSchema } from '@ref
 import { FormLayout } from '../../layouts/FormLayout';
 import { hexaRegistry } from '../../libs/hexa-ui';
 import rawJsonSchema from './form.json';
-import { formBehavior } from './behavior';
-import { initialFormModel, type FormShape } from './model';
-import { createFormUiBehavior } from './ui';
+import { formBehavior } from './form.behavior';
+import { initialFormModel, type FormShape } from './form.model';
+import { createFormUiBehavior } from './ui.behavior';
 
 // Операторы в чистом JSON типизируются как `string` — приведение и есть сценарий
 // «схема пришла строкой с сервера».

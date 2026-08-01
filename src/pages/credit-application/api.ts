@@ -14,7 +14,7 @@
  * - GET  /api/v1/car-models?brand={brand}  — модели авто по марке
  */
 
-import type { CreditApplicationForm, Option } from './types';
+import type { CreditApplicationForm, Option } from "./form.types";
 
 /**
  * Подмножество `AxiosResponse`, которым реально пользуется код заявки. Больше полей не нужно —
@@ -62,21 +62,21 @@ function respond<T>(
 
   return new Promise<ApiResponse<T>>((resolve, reject) => {
     if (signal?.aborted) {
-      reject(new DOMException('Запрос отменён', 'AbortError'));
+      reject(new DOMException("Запрос отменён", "AbortError"));
       return;
     }
 
     const onAbort = () => {
       clearTimeout(timer);
-      reject(new DOMException('Запрос отменён', 'AbortError'));
+      reject(new DOMException("Запрос отменён", "AbortError"));
     };
 
     const timer = setTimeout(() => {
-      signal?.removeEventListener('abort', onAbort);
+      signal?.removeEventListener("abort", onAbort);
       resolve({ data, status });
     }, ms);
 
-    signal?.addEventListener('abort', onAbort, { once: true });
+    signal?.addEventListener("abort", onAbort, { once: true });
   });
 }
 
@@ -87,32 +87,32 @@ function respond<T>(
 /** Справочники (фикстура из мока источника, дополнена типами имущества). */
 const MOCK_DICTIONARIES: DictionariesResponse = {
   banks: [
-    { value: 'sberbank', label: 'Сбербанк' },
-    { value: 'vtb', label: 'ВТБ' },
-    { value: 'alfabank', label: 'Альфа-Банк' },
-    { value: 'tinkoff', label: 'Тинькофф' },
-    { value: 'gazprombank', label: 'Газпромбанк' },
-    { value: 'raiffeisen', label: 'Райффайзенбанк' },
-    { value: 'rosbank', label: 'Росбанк' },
-    { value: 'sovcombank', label: 'Совкомбанк' },
+    { value: "sberbank", label: "Сбербанк" },
+    { value: "vtb", label: "ВТБ" },
+    { value: "alfabank", label: "Альфа-Банк" },
+    { value: "tinkoff", label: "Тинькофф" },
+    { value: "gazprombank", label: "Газпромбанк" },
+    { value: "raiffeisen", label: "Райффайзенбанк" },
+    { value: "rosbank", label: "Росбанк" },
+    { value: "sovcombank", label: "Совкомбанк" },
   ],
   cities: [
-    { value: 'moscow', label: 'Москва' },
-    { value: 'spb', label: 'Санкт-Петербург' },
-    { value: 'novosibirsk', label: 'Новосибирск' },
-    { value: 'ekaterinburg', label: 'Екатеринбург' },
-    { value: 'kazan', label: 'Казань' },
-    { value: 'nn', label: 'Нижний Новгород' },
-    { value: 'chelyabinsk', label: 'Челябинск' },
-    { value: 'samara', label: 'Самара' },
-    { value: 'omsk', label: 'Омск' },
-    { value: 'rostov', label: 'Ростов-на-Дону' },
+    { value: "moscow", label: "Москва" },
+    { value: "spb", label: "Санкт-Петербург" },
+    { value: "novosibirsk", label: "Новосибирск" },
+    { value: "ekaterinburg", label: "Екатеринбург" },
+    { value: "kazan", label: "Казань" },
+    { value: "nn", label: "Нижний Новгород" },
+    { value: "chelyabinsk", label: "Челябинск" },
+    { value: "samara", label: "Самара" },
+    { value: "omsk", label: "Омск" },
+    { value: "rostov", label: "Ростов-на-Дону" },
   ],
   propertyTypes: [
-    { value: 'apartment', label: 'Квартира' },
-    { value: 'house', label: 'Дом' },
-    { value: 'car', label: 'Автомобиль' },
-    { value: 'land', label: 'Земельный участок' },
+    { value: "apartment", label: "Квартира" },
+    { value: "house", label: "Дом" },
+    { value: "car", label: "Автомобиль" },
+    { value: "land", label: "Земельный участок" },
   ],
 };
 
@@ -124,28 +124,28 @@ const MOCK_DICTIONARIES: DictionariesResponse = {
  * и значение, не проходящее валидацию, встретило бы пользователя ошибками на пустой форме.
  */
 const MOCK_APPLICATIONS: Record<string, Partial<CreditApplicationForm>> = {
-  '1': {
-    loanType: 'consumer',
+  "1": {
+    loanType: "consumer",
     loanAmount: 500000,
     loanTerm: 36,
-    loanPurpose: 'Ремонт квартиры',
+    loanPurpose: "Ремонт квартиры",
     personalData: {
-      lastName: 'Иванов',
-      firstName: 'Иван',
-      middleName: 'Иванович',
-      birthDate: '1990-05-12',
-      birthPlace: 'Москва',
-      gender: 'male',
+      lastName: "Иванов",
+      firstName: "Иван",
+      middleName: "Иванович",
+      birthDate: "1990-05-12",
+      birthPlace: "Москва",
+      gender: "male",
     },
-    phoneMain: '+7 (999) 123-45-67',
-    email: 'ivan.ivanov@example.com',
+    phoneMain: "+7 (999) 123-45-67",
+    email: "ivan.ivanov@example.com",
     registrationAddress: {
-      region: 'moscow',
-      city: 'moscow',
-      street: 'Тверская',
-      house: '10',
-      apartment: '25',
-      postalCode: '125009',
+      region: "moscow",
+      city: "moscow",
+      street: "Тверская",
+      house: "10",
+      apartment: "25",
+      postalCode: "125009",
     },
     monthlyIncome: 120000,
   },
@@ -158,19 +158,19 @@ const MOCK_APPLICATIONS: Record<string, Partial<CreditApplicationForm>> = {
  */
 const MOCK_CITIES_BY_REGION: Record<string, Option[]> = {
   moscow: [
-    { value: 'moscow', label: 'Москва' },
-    { value: 'zelenograd', label: 'Зеленоград' },
-    { value: 'troitsk', label: 'Троицк' },
+    { value: "moscow", label: "Москва" },
+    { value: "zelenograd", label: "Зеленоград" },
+    { value: "troitsk", label: "Троицк" },
   ],
   spb: [
-    { value: 'spb', label: 'Санкт-Петербург' },
-    { value: 'pushkin', label: 'Пушкин' },
-    { value: 'kolpino', label: 'Колпино' },
+    { value: "spb", label: "Санкт-Петербург" },
+    { value: "pushkin", label: "Пушкин" },
+    { value: "kolpino", label: "Колпино" },
   ],
   tatarstan: [
-    { value: 'kazan', label: 'Казань' },
-    { value: 'naberezhnye-chelny', label: 'Набережные Челны' },
-    { value: 'almetyevsk', label: 'Альметьевск' },
+    { value: "kazan", label: "Казань" },
+    { value: "naberezhnye-chelny", label: "Набережные Челны" },
+    { value: "almetyevsk", label: "Альметьевск" },
   ],
 };
 
@@ -181,42 +181,42 @@ const MOCK_CITIES_BY_REGION: Record<string, Option[]> = {
  */
 const MOCK_CAR_MODELS: Record<string, Option[]> = {
   toyota: [
-    { value: 'camry', label: 'Camry' },
-    { value: 'corolla', label: 'Corolla' },
-    { value: 'rav4', label: 'RAV4' },
-    { value: 'land-cruiser', label: 'Land Cruiser' },
+    { value: "camry", label: "Camry" },
+    { value: "corolla", label: "Corolla" },
+    { value: "rav4", label: "RAV4" },
+    { value: "land-cruiser", label: "Land Cruiser" },
   ],
   kia: [
-    { value: 'rio', label: 'Rio' },
-    { value: 'sportage', label: 'Sportage' },
-    { value: 'k5', label: 'K5' },
+    { value: "rio", label: "Rio" },
+    { value: "sportage", label: "Sportage" },
+    { value: "k5", label: "K5" },
   ],
   hyundai: [
-    { value: 'solaris', label: 'Solaris' },
-    { value: 'creta', label: 'Creta' },
-    { value: 'tucson', label: 'Tucson' },
+    { value: "solaris", label: "Solaris" },
+    { value: "creta", label: "Creta" },
+    { value: "tucson", label: "Tucson" },
   ],
   lada: [
-    { value: 'vesta', label: 'Vesta' },
-    { value: 'granta', label: 'Granta' },
-    { value: 'niva', label: 'Niva' },
+    { value: "vesta", label: "Vesta" },
+    { value: "granta", label: "Granta" },
+    { value: "niva", label: "Niva" },
   ],
   bmw: [
-    { value: 'x3', label: 'X3' },
-    { value: 'x5', label: 'X5' },
-    { value: '3-series', label: '3 series' },
+    { value: "x3", label: "X3" },
+    { value: "x5", label: "X5" },
+    { value: "3-series", label: "3 series" },
   ],
 };
 
 /** Синонимы марок: пользователь пишет по-русски чаще, чем латиницей. */
 const CAR_BRAND_ALIASES: Record<string, string> = {
-  тойота: 'toyota',
-  киа: 'kia',
-  хендай: 'hyundai',
-  хёндэ: 'hyundai',
-  лада: 'lada',
-  ваз: 'lada',
-  бмв: 'bmw',
+  тойота: "toyota",
+  киа: "kia",
+  хендай: "hyundai",
+  хёндэ: "hyundai",
+  лада: "lada",
+  ваз: "lada",
+  бмв: "bmw",
 };
 
 const normalize = (value: string): string => value.trim().toLowerCase();
@@ -234,7 +234,8 @@ export function fetchCreditApplication(
   signal?: AbortSignal,
 ): Promise<ApiResponse<Partial<CreditApplicationForm>>> {
   // Неизвестный id — пустой черновик: `Partial` позволяет вернуть `{}`, и форма останется initial.
-  const application: Partial<CreditApplicationForm> = MOCK_APPLICATIONS[id] ?? {};
+  const application: Partial<CreditApplicationForm> =
+    MOCK_APPLICATIONS[id] ?? {};
   return respond(application, MOCK_DELAYS.application, { signal });
 }
 
@@ -242,7 +243,9 @@ export function fetchCreditApplication(
  * Загрузка справочников (банки, города, типы имущества).
  * `GET /api/v1/dictionaries`
  */
-export function fetchDictionaries(signal?: AbortSignal): Promise<ApiResponse<DictionariesResponse>> {
+export function fetchDictionaries(
+  signal?: AbortSignal,
+): Promise<ApiResponse<DictionariesResponse>> {
   return respond(MOCK_DICTIONARIES, MOCK_DELAYS.dictionaries, { signal });
 }
 
@@ -251,7 +254,8 @@ export function fetchDictionaries(signal?: AbortSignal): Promise<ApiResponse<Dic
  * `GET /api/v1/cities?region={region}`
  */
 export function fetchCities(region: string): Promise<ApiResponse<Option[]>> {
-  const cities = MOCK_CITIES_BY_REGION[normalize(region)] ?? MOCK_DICTIONARIES.cities;
+  const cities =
+    MOCK_CITIES_BY_REGION[normalize(region)] ?? MOCK_DICTIONARIES.cities;
   return respond(cities, MOCK_DELAYS.options);
 }
 
@@ -281,7 +285,7 @@ export function submitCreditApplication(
     {
       success: true,
       id,
-      message: `Заявка на ${data.loanType ?? 'кредит'} принята в обработку`,
+      message: `Заявка на ${data.loanType ?? "кредит"} принята в обработку`,
     },
     MOCK_DELAYS.submit,
     { status: 201 },

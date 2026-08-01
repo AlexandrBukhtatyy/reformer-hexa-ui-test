@@ -6,7 +6,7 @@
  * появляться ни асинхронности, ни обращениям к модели — иначе зависимость не отследится.
  */
 
-import type { CoBorrower, PersonalData } from './types';
+import type { CoBorrower, PersonalData } from "./form.types";
 
 /**
  * Процентная ставка по типу кредита с надбавками/скидками.
@@ -36,11 +36,11 @@ export function computeInterestRate({
   let rate = baseRates[loanType] || 15.0;
 
   // Надбавки и скидки
-  if (loanType === 'mortgage') {
+  if (loanType === "mortgage") {
     // Надбавка за регион (Москва дороже). Адрес приходит нетипизированным куском модели —
     // читаем поле через каст, чтобы не тащить сюда зависимость от формы адреса.
     const region = (registrationAddress as Record<string, unknown>)?.region;
-    if (region === 'moscow') {
+    if (region === "moscow") {
       rate += 0.5;
     }
   }
@@ -85,7 +85,8 @@ export function computeMonthlyPayment({
 
   // Формула аннуитетного платежа
   const coefficient =
-    (monthlyRate * Math.pow(1 + monthlyRate, loanTerm)) / (Math.pow(1 + monthlyRate, loanTerm) - 1);
+    (monthlyRate * Math.pow(1 + monthlyRate, loanTerm)) /
+    (Math.pow(1 + monthlyRate, loanTerm) - 1);
   const monthlyPayment = loanAmount * coefficient;
 
   return Math.round(monthlyPayment);
@@ -96,7 +97,11 @@ export function computeMonthlyPayment({
  *
  * @returns взнос (₽)
  */
-export function computeInitialPayment({ propertyValue }: { propertyValue: number }): number {
+export function computeInitialPayment({
+  propertyValue,
+}: {
+  propertyValue: number;
+}): number {
   if (!propertyValue) {
     return 0;
   }
@@ -107,13 +112,17 @@ export function computeInitialPayment({ propertyValue }: { propertyValue: number
 /**
  * Полное имя: Фамилия Имя Отчество (пустые части выпадают, лишних пробелов не остаётся).
  */
-export function computeFullName({ personalData }: { personalData: PersonalData }): string {
+export function computeFullName({
+  personalData,
+}: {
+  personalData: PersonalData;
+}): string {
   const data = personalData;
-  const lastName = data?.lastName || '';
-  const firstName = data?.firstName || '';
-  const middleName = data?.middleName || '';
+  const lastName = data?.lastName || "";
+  const firstName = data?.firstName || "";
+  const middleName = data?.middleName || "";
 
-  return [lastName, firstName, middleName].filter(Boolean).join(' ');
+  return [lastName, firstName, middleName].filter(Boolean).join(" ");
 }
 
 /**
@@ -121,7 +130,11 @@ export function computeFullName({ personalData }: { personalData: PersonalData }
  *
  * @returns возраст или `null`, если дата не заполнена — на `null` завязаны required-правила
  */
-export function computeAge({ personalData }: { personalData: PersonalData }): number | null {
+export function computeAge({
+  personalData,
+}: {
+  personalData: PersonalData;
+}): number | null {
   const birthDate = personalData.birthDate;
 
   if (!birthDate) {
@@ -154,7 +167,9 @@ export function computeTotalIncome({
   additionalIncome: number;
   coBorrowersIncome?: number;
 }): number {
-  return (monthlyIncome || 0) + (additionalIncome || 0) + (coBorrowersIncome || 0);
+  return (
+    (monthlyIncome || 0) + (additionalIncome || 0) + (coBorrowersIncome || 0)
+  );
 }
 
 /**
@@ -182,13 +197,17 @@ export function computePaymentRatio({
  * ⚠️ Проверка `Array.isArray` не формальность: если сюда передать `ModelArray` (фасад массива
  * модели) вместо результата `model.coBorrowers.map(...)`, функция молча вернёт 0.
  */
-export function computeCoBorrowersIncome({ coBorrowers }: { coBorrowers: CoBorrower[] }): number {
+export function computeCoBorrowersIncome({
+  coBorrowers,
+}: {
+  coBorrowers: CoBorrower[];
+}): number {
   if (!coBorrowers || !Array.isArray(coBorrowers)) {
     return 0;
   }
 
   return coBorrowers.reduce((sum, coBorrower) => {
     const income = coBorrower.monthlyIncome || 0;
-    return sum + (typeof income === 'number' ? income : 0);
+    return sum + (typeof income === "number" ? income : 0);
   }, 0);
 }

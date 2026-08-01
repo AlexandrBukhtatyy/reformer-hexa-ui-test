@@ -12,7 +12,7 @@
 
 import { createContext, useContext, type ReactNode } from 'react';
 import type { FormProxy } from '@reformer/core';
-import type { CreditApplicationForm } from './types';
+import type { CreditApplicationForm } from './form.types';
 
 /**
  * `null` — маркер «провайдера нет». Отличать его от валидной формы обязательно: без маркера
