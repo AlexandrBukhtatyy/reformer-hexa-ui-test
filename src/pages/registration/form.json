@@ -2,28 +2,36 @@
   "$schema": "./form-schema.schema.json",
   "version": "1.0",
   "root": {
-    "component": "$html(div)",
-    "componentProps": {
-      "className": "space-y-4"
-    },
-    "children": [
-      {
-        "selector": "name",
-        "value": "$model(name)",
-        "component": "$component(Textbox)",
-        "componentProps": {
-          "label": "Имя"
-        }
+      "component": "$component(Card)",
+      "componentProps": {
+        "className": "space-y-6"
       },
-      {
-        "selector": "email",
-        "value": "$model(email)",
-        "component": "$component(Textbox)",
-        "componentProps": {
-          "label": "Email",
-          "type": "email"
+      "children": [
+        {
+          "component": "$html(div)",
+          "componentProps": {
+            "className": "space-y-4"
+          },
+          "children": [
+            {
+              "selector": "name",
+              "value": "$model(name)",
+              "component": "$component(Textbox)",
+              "componentProps": {
+                "label": "Имя"
+              }
+            },
+            {
+              "selector": "email",
+              "value": "$model(email)",
+              "component": "$component(Textbox)",
+              "componentProps": {
+                "label": "Email",
+                "type": "email"
+              }
+            }
+          ]
         }
-      }
-    ]
-  }
+      ]
+    }
 }

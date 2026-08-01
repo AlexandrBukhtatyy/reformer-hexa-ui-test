@@ -1,160 +1,171 @@
 {
   "version": "1.0",
   "root": {
-    "selector": "wizard",
-    "component": "$component(Wizard)",
+    "component": "$component(Card)",
     "componentProps": {
-      "isVertical": "true",
-      "steps": [
-        {
-          "component": "$component(Step)",
-          "componentProps": {
-            "name": "Тариф",
-            "description": "Что подключаем",
-            "className": "flex flex-col gap-4"
-          },
-          "children": [
+      "className": "space-y-6"
+    },
+    "children": [
+      {
+        "selector": "wizard",
+        "component": "$component(Wizard)",
+        "componentProps": {
+          "isVertical": "true",
+          "steps": [
             {
-              "component": "$component(Heading)",
-              "componentProps": { "type": "H4" },
-              "text": "Выберите тариф"
-            },
-            {
-              "component": "$component(SectionMessage)",
-
+              "component": "$component(Step)",
               "componentProps": {
-                "mode": "info",
-                "title": "Первые 14 дней — бесплатно",
-                "closable": false
+                "name": "Тариф",
+                "description": "Что подключаем",
+                "className": "flex flex-col gap-4"
               },
               "children": [
                 {
-                  "component": "$component(Text)",
-                  "text": "Списаний не будет, пока не закончится пробный период."
-                }
-              ]
-            },
-            {
-              "selector": "plan",
-              "value": "$model(plan)",
-              "component": "$component(Radio)",
-              "componentProps": {
-                "label": "Тариф",
-                "vertical": true,
-                "options": [
-                  { "label": "Базовый", "value": "basic" },
-                  { "label": "Командный", "value": "team" },
-                  { "label": "Корпоративный", "value": "enterprise" }
-                ]
-              }
-            },
-            {
-              "selector": "billing",
-              "value": "$model(billing)",
-              "component": "$component(Radio)",
-              "componentProps": {
-                "label": "Периодичность оплаты",
-                "options": [
-                  { "label": "Ежемесячно", "value": "monthly" },
-                  { "label": "Раз в год (−20%)", "value": "yearly" }
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "component": "$component(Step)",
-          "componentProps": {
-            "name": "Контакты",
-            "description": "Куда присылать счета",
-            "className": "flex flex-col gap-4"
-          },
-          "children": [
-            {
-              "component": "$component(Heading)",
-              "componentProps": { "type": "H4" },
-              "text": "Контактные данные"
-            },
-            {
-              "selector": "contact-name",
-              "value": "$model(contactName)",
-              "component": "$component(Textbox)",
-              "componentProps": { "label": "Имя" }
-            },
-            {
-              "selector": "email",
-              "value": "$model(email)",
-              "component": "$component(Textbox)",
-              "componentProps": { "label": "Email", "type": "email" }
-            },
-            {
-              "selector": "company",
-              "value": "$model(company)",
-              "component": "$component(Textbox)",
-              "componentProps": { "label": "Компания" }
-            },
-            {
-              "selector": "promo-card",
-              "component": "$component(Card)",
-              "componentProps": { "title": "Промокод" },
-              "children": [
-                {
-                  "component": "$component(Text)",
-                  "componentProps": { "color": "secondary" },
-                  "text": "Промокод действует только для годовой оплаты."
+                  "component": "$component(Heading)",
+                  "componentProps": { "type": "H4" },
+                  "text": "Выберите тариф"
                 },
                 {
-                  "selector": "promo",
-                  "value": "$model(promo)",
-                  "component": "$component(Textbox)",
-                  "componentProps": { "label": "Промокод" }
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "component": "$component(Step)",
-          "componentProps": {
-            "name": "Подтверждение",
-            "description": "Проверьте заявку",
-            "className": "space-y-4"
-          },
-          "children": [
-            {
-              "component": "$component(Heading)",
-              "componentProps": { "type": "H4" },
-              "text": "Всё верно?"
-            },
-            {
-              "component": "$component(Card)",
-              "componentProps": { "title": "Итого", "mode": "filled" },
-              "children": [
-                { "component": "$component(Text)", "text": "$model(summary)" },
+                  "component": "$component(SectionMessage)",
+
+                  "componentProps": {
+                    "mode": "info",
+                    "title": "Первые 14 дней — бесплатно",
+                    "closable": false
+                  },
+                  "children": [
+                    {
+                      "component": "$component(Text)",
+                      "text": "Списаний не будет, пока не закончится пробный период."
+                    }
+                  ]
+                },
                 {
-                  "component": "$component(Text)",
-                  "componentProps": { "color": "secondary" },
-                  "text": ["Счета уйдут на ", "$model(email)"]
+                  "selector": "plan",
+                  "value": "$model(plan)",
+                  "component": "$component(Radio)",
+                  "componentProps": {
+                    "label": "Тариф",
+                    "vertical": true,
+                    "options": [
+                      { "label": "Базовый", "value": "basic" },
+                      { "label": "Командный", "value": "team" },
+                      { "label": "Корпоративный", "value": "enterprise" }
+                    ]
+                  }
+                },
+                {
+                  "selector": "billing",
+                  "value": "$model(billing)",
+                  "component": "$component(Radio)",
+                  "componentProps": {
+                    "label": "Периодичность оплаты",
+                    "options": [
+                      { "label": "Ежемесячно", "value": "monthly" },
+                      { "label": "Раз в год (−20%)", "value": "yearly" }
+                    ]
+                  }
                 }
               ]
             },
             {
-              "component": "$component(SectionMessage)",
+              "component": "$component(Step)",
               "componentProps": {
-                "mode": "warning",
-                "title": "Ещё можно вернуться",
-                "closable": false
+                "name": "Контакты",
+                "description": "Куда присылать счета",
+                "className": "flex flex-col gap-4"
               },
               "children": [
                 {
-                  "component": "$component(Text)",
-                  "text": "Кнопка «Назад» сохраняет всё, что вы уже ввели."
+                  "component": "$component(Heading)",
+                  "componentProps": { "type": "H4" },
+                  "text": "Контактные данные"
+                },
+                {
+                  "selector": "contact-name",
+                  "value": "$model(contactName)",
+                  "component": "$component(Textbox)",
+                  "componentProps": { "label": "Имя" }
+                },
+                {
+                  "selector": "email",
+                  "value": "$model(email)",
+                  "component": "$component(Textbox)",
+                  "componentProps": { "label": "Email", "type": "email" }
+                },
+                {
+                  "selector": "company",
+                  "value": "$model(company)",
+                  "component": "$component(Textbox)",
+                  "componentProps": { "label": "Компания" }
+                },
+                {
+                  "selector": "promo-card",
+                  "component": "$component(Card)",
+                  "componentProps": { "title": "Промокод" },
+                  "children": [
+                    {
+                      "component": "$component(Text)",
+                      "componentProps": { "color": "secondary" },
+                      "text": "Промокод действует только для годовой оплаты."
+                    },
+                    {
+                      "selector": "promo",
+                      "value": "$model(promo)",
+                      "component": "$component(Textbox)",
+                      "componentProps": { "label": "Промокод" }
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "component": "$component(Step)",
+              "componentProps": {
+                "name": "Подтверждение",
+                "description": "Проверьте заявку",
+                "className": "space-y-4"
+              },
+              "children": [
+                {
+                  "component": "$component(Heading)",
+                  "componentProps": { "type": "H4" },
+                  "text": "Всё верно?"
+                },
+                {
+                  "component": "$component(Card)",
+                  "componentProps": { "title": "Итого", "mode": "filled" },
+                  "children": [
+                    {
+                      "component": "$component(Text)",
+                      "text": "$model(summary)"
+                    },
+                    {
+                      "component": "$component(Text)",
+                      "componentProps": { "color": "secondary" },
+                      "text": ["Счета уйдут на ", "$model(email)"]
+                    }
+                  ]
+                },
+                {
+                  "component": "$component(SectionMessage)",
+                  "componentProps": {
+                    "mode": "warning",
+                    "title": "Ещё можно вернуться",
+                    "closable": false
+                  },
+                  "children": [
+                    {
+                      "component": "$component(Text)",
+                      "text": "Кнопка «Назад» сохраняет всё, что вы уже ввели."
+                    }
+                  ]
                 }
               ]
             }
           ]
         }
-      ]
-    }
+      }
+    ]
   }
 }
