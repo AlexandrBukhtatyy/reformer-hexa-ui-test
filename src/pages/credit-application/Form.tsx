@@ -35,13 +35,13 @@ import {
 } from '@reformer/renderer-json';
 import { FormLayout } from '../../layouts/FormLayout';
 import { resolveFieldAdapter } from '../../libs/hexa-ui';
-import { creditApplicationBehavior } from './behavior';
+import { creditApplicationBehavior } from './form.behavior';
 import { CreditFormProvider } from './form-context';
 import rawJsonSchema from './form.json';
 import { createCreditApplicationModel } from './model';
 import { createCreditRegistry } from './registry';
 import type { CreditApplicationForm } from './types';
-import { createCreditUiBehavior, type CreditFormStatus } from './ui';
+import { createCreditUiBehavior, type CreditFormStatus } from './ui.behavior';
 
 // Операторы в чистом JSON типизируются как `string` — приведение и есть сценарий
 // «схема пришла строкой с сервера».

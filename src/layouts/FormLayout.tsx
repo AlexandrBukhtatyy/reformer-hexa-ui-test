@@ -27,7 +27,7 @@ export interface FormLayoutProps {
 export function FormLayout({ children }: FormLayoutProps) {
   return (
     <div className="@container min-h-dvh mx-auto bg-slate-100 p-4">
-      <div className="w-full max-w-7xl mx-auto p-4 bg-white">
+      <div className="w-full max-w-7xl mx-auto p-4">
         <ValidationMessagesProvider resolver={resolveValidationMessage}>
           <JsonRendererProvider settings={RENDERER_SETTINGS}>{children}</JsonRendererProvider>
         </ValidationMessagesProvider>
