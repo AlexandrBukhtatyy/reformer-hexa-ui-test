@@ -48,13 +48,6 @@ export function HexaField({ control, className, testId, children }: FieldWrapper
 }
 
 /**
- * `Textbox` — уже value-based (`value` + `onChange(value)`), поэтому переклад seam'а не нужен.
- * Адаптер здесь ради двух вещей: он не подмешивает в контрол проп `control` (ноду формы) и
- * снимает `label` — его рисует обёртка, а в antd-input он утёк бы атрибутом в DOM.
- */
-export const TEXTBOX_ADAPTER: FieldAdapter = { strip: ['label'] };
-
-/**
  * `Radio` — это antd `Radio.Group`: значение он отдаёт не аргументом, а DOM-событием
  * (`onChange(event)`). Без перевода в модель уехал бы сам объект события.
  *

@@ -17,7 +17,7 @@ export { HexaCheckbox, CHECKBOX_ADAPTER, type HexaCheckboxProps } from './HexaCh
 export { HexaUploader, UPLOADER_ADAPTER, type HexaUploaderProps } from './HexaUploader';
 
 // Обёртка поля (`FIELD_WRAPPER`) и адаптеры сырых контролов hexa-ui.
-export { HexaField, RADIO_ADAPTER, TEXTBOX_ADAPTER } from './HexaField';
+export { HexaField, RADIO_ADAPTER } from './HexaField';
 
 // Контейнеры и узлы-массивы.
 export { HexaBox } from './HexaBox';

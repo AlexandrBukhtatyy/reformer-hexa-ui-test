@@ -31,7 +31,9 @@ import {
   Text,
   type KeyValuePair,
 } from '@kaspersky/hexa-ui';
-import { HexaCard } from '../../libs/hexa-ui';
+// Пофайлово, а не через барель: реестр моста импортирует этот модуль, и импорт из index.ts
+// замкнул бы цикл (index → registry → components → index).
+import { HexaCard } from '../../libs/hexa-ui/HexaCard';
 import { useCreditForm } from './form-context';
 
 // ============================================================================

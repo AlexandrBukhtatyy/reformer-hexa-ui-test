@@ -9,7 +9,7 @@
     "children": [
       {
         "selector": "wizard",
-        "component": "$component(RendererFormWizard)",
+        "component": "$component(Wizard)",
         "componentProps": {
           "className": "bg-white p-4 rounded-lg shadow-md md:p-8 overflow-x-auto",
           "steps": [
@@ -46,7 +46,7 @@
                         },
                         {
                           "value": "$model(loanAmount)",
-                          "component": "$component(Input)",
+                          "component": "$component(Textbox)",
                           "componentProps": {
                             "label": "Сумма кредита (₽)",
                             "placeholder": "Введите сумму",
@@ -58,7 +58,7 @@
                         },
                         {
                           "value": "$model(loanTerm)",
-                          "component": "$component(Input)",
+                          "component": "$component(Textbox)",
                           "componentProps": {
                             "label": "Срок кредита (месяцев)",
                             "placeholder": "Введите срок",
@@ -90,7 +90,7 @@
                       "children": [
                         {
                           "value": "$model(propertyValue)",
-                          "component": "$component(Input)",
+                          "component": "$component(Textbox)",
                           "componentProps": {
                             "label": "Стоимость недвижимости (₽)",
                             "placeholder": "Введите стоимость",
@@ -101,7 +101,7 @@
                         },
                         {
                           "value": "$model(initialPayment)",
-                          "component": "$component(Input)",
+                          "component": "$component(Textbox)",
                           "componentProps": {
                             "label": "Первоначальный взнос (₽)",
                             "placeholder": "Введите сумму",
@@ -123,7 +123,7 @@
                       "children": [
                         {
                           "value": "$model(carBrand)",
-                          "component": "$component(Input)",
+                          "component": "$component(Textbox)",
                           "componentProps": {
                             "label": "Марка автомобиля",
                             "placeholder": "Например: Toyota"
@@ -145,7 +145,7 @@
                           "children": [
                             {
                               "value": "$model(carYear)",
-                              "component": "$component(Input)",
+                              "component": "$component(Textbox)",
                               "componentProps": {
                                 "label": "Год выпуска",
                                 "placeholder": "2020",
@@ -156,7 +156,7 @@
                             },
                             {
                               "value": "$model(carPrice)",
-                              "component": "$component(Input)",
+                              "component": "$component(Textbox)",
                               "componentProps": {
                                 "label": "Стоимость автомобиля (₽)",
                                 "placeholder": "Введите стоимость",
@@ -205,7 +205,7 @@
                           "children": [
                             {
                               "value": "$model(personalData.lastName)",
-                              "component": "$component(Input)",
+                              "component": "$component(Textbox)",
                               "componentProps": {
                                 "label": "Фамилия",
                                 "placeholder": "Введите фамилию"
@@ -213,7 +213,7 @@
                             },
                             {
                               "value": "$model(personalData.firstName)",
-                              "component": "$component(Input)",
+                              "component": "$component(Textbox)",
                               "componentProps": {
                                 "label": "Имя",
                                 "placeholder": "Введите имя"
@@ -221,7 +221,7 @@
                             },
                             {
                               "value": "$model(personalData.middleName)",
-                              "component": "$component(Input)",
+                              "component": "$component(Textbox)",
                               "componentProps": {
                                 "label": "Отчество",
                                 "placeholder": "Введите отчество"
@@ -237,7 +237,7 @@
                           "children": [
                             {
                               "value": "$model(personalData.birthDate)",
-                              "component": "$component(Input)",
+                              "component": "$component(Textbox)",
                               "componentProps": {
                                 "label": "Дата рождения",
                                 "type": "date"
@@ -245,7 +245,7 @@
                             },
                             {
                               "value": "$model(personalData.gender)",
-                              "component": "$component(RadioGroup)",
+                              "component": "$component(Radio)",
                               "componentProps": {
                                 "label": "Пол",
                                 "options": "$dataSource(GENDERS)"
@@ -255,7 +255,7 @@
                         },
                         {
                           "value": "$model(personalData.birthPlace)",
-                          "component": "$component(Input)",
+                          "component": "$component(Textbox)",
                           "componentProps": {
                             "label": "Место рождения",
                             "placeholder": "Введите место рождения"
@@ -279,7 +279,7 @@
                           "children": [
                             {
                               "value": "$model(passportData.series)",
-                              "component": "$component(InputMask)",
+                              "component": "$component(TextboxMasked)",
                               "componentProps": {
                                 "label": "Серия паспорта",
                                 "placeholder": "00 00",
@@ -288,7 +288,7 @@
                             },
                             {
                               "value": "$model(passportData.number)",
-                              "component": "$component(InputMask)",
+                              "component": "$component(TextboxMasked)",
                               "componentProps": {
                                 "label": "Номер паспорта",
                                 "placeholder": "000000",
@@ -314,7 +314,7 @@
                           "children": [
                             {
                               "value": "$model(passportData.issueDate)",
-                              "component": "$component(Input)",
+                              "component": "$component(Textbox)",
                               "componentProps": {
                                 "label": "Дата выдачи",
                                 "type": "date"
@@ -322,7 +322,7 @@
                             },
                             {
                               "value": "$model(passportData.departmentCode)",
-                              "component": "$component(InputMask)",
+                              "component": "$component(TextboxMasked)",
                               "componentProps": {
                                 "label": "Код подразделения",
                                 "placeholder": "000-000",
@@ -349,7 +349,7 @@
                           "children": [
                             {
                               "value": "$model(inn)",
-                              "component": "$component(InputMask)",
+                              "component": "$component(TextboxMasked)",
                               "componentProps": {
                                 "label": "ИНН",
                                 "placeholder": "123456789012",
@@ -358,7 +358,7 @@
                             },
                             {
                               "value": "$model(snils)",
-                              "component": "$component(InputMask)",
+                              "component": "$component(TextboxMasked)",
                               "componentProps": {
                                 "label": "СНИЛС",
                                 "placeholder": "123-456-789 00",
@@ -405,7 +405,7 @@
                           "children": [
                             {
                               "value": "$model(phoneMain)",
-                              "component": "$component(InputMask)",
+                              "component": "$component(TextboxMasked)",
                               "componentProps": {
                                 "label": "Основной телефон",
                                 "placeholder": "+7 (___) ___-__-__",
@@ -414,7 +414,7 @@
                             },
                             {
                               "value": "$model(phoneAdditional)",
-                              "component": "$component(InputMask)",
+                              "component": "$component(TextboxMasked)",
                               "componentProps": {
                                 "label": "Дополнительный телефон",
                                 "placeholder": "+7 (___) ___-__-__",
@@ -431,7 +431,7 @@
                           "children": [
                             {
                               "value": "$model(email)",
-                              "component": "$component(Input)",
+                              "component": "$component(Textbox)",
                               "componentProps": {
                                 "label": "Email",
                                 "placeholder": "example@mail.com",
@@ -440,7 +440,7 @@
                             },
                             {
                               "value": "$model(emailAdditional)",
-                              "component": "$component(Input)",
+                              "component": "$component(Textbox)",
                               "componentProps": {
                                 "label": "Дополнительный email",
                                 "placeholder": "example@mail.com",
@@ -467,7 +467,7 @@
                           "children": [
                             {
                               "value": "$model(registrationAddress.region)",
-                              "component": "$component(Input)",
+                              "component": "$component(Textbox)",
                               "componentProps": {
                                 "label": "Регион",
                                 "placeholder": "Введите регион"
@@ -475,7 +475,7 @@
                             },
                             {
                               "value": "$model(registrationAddress.city)",
-                              "component": "$component(Input)",
+                              "component": "$component(Textbox)",
                               "componentProps": {
                                 "label": "Город",
                                 "placeholder": "Введите город"
@@ -485,7 +485,7 @@
                         },
                         {
                           "value": "$model(registrationAddress.street)",
-                          "component": "$component(Input)",
+                          "component": "$component(Textbox)",
                           "componentProps": {
                             "label": "Улица",
                             "placeholder": "Введите улицу"
@@ -499,7 +499,7 @@
                           "children": [
                             {
                               "value": "$model(registrationAddress.house)",
-                              "component": "$component(Input)",
+                              "component": "$component(Textbox)",
                               "componentProps": {
                                 "label": "Дом",
                                 "placeholder": "№"
@@ -507,7 +507,7 @@
                             },
                             {
                               "value": "$model(registrationAddress.apartment)",
-                              "component": "$component(Input)",
+                              "component": "$component(Textbox)",
                               "componentProps": {
                                 "label": "Квартира",
                                 "placeholder": "№"
@@ -515,7 +515,7 @@
                             },
                             {
                               "value": "$model(registrationAddress.postalCode)",
-                              "component": "$component(InputMask)",
+                              "component": "$component(TextboxMasked)",
                               "componentProps": {
                                 "label": "Индекс",
                                 "placeholder": "000000",
@@ -548,7 +548,7 @@
                               "children": [
                                 {
                                   "value": "$model(residenceAddress.region)",
-                                  "component": "$component(Input)",
+                                  "component": "$component(Textbox)",
                                   "componentProps": {
                                     "label": "Регион",
                                     "placeholder": "Введите регион"
@@ -556,7 +556,7 @@
                                 },
                                 {
                                   "value": "$model(residenceAddress.city)",
-                                  "component": "$component(Input)",
+                                  "component": "$component(Textbox)",
                                   "componentProps": {
                                     "label": "Город",
                                     "placeholder": "Введите город"
@@ -566,7 +566,7 @@
                             },
                             {
                               "value": "$model(residenceAddress.street)",
-                              "component": "$component(Input)",
+                              "component": "$component(Textbox)",
                               "componentProps": {
                                 "label": "Улица",
                                 "placeholder": "Введите улицу"
@@ -580,7 +580,7 @@
                               "children": [
                                 {
                                   "value": "$model(residenceAddress.house)",
-                                  "component": "$component(Input)",
+                                  "component": "$component(Textbox)",
                                   "componentProps": {
                                     "label": "Дом",
                                     "placeholder": "№"
@@ -588,7 +588,7 @@
                                 },
                                 {
                                   "value": "$model(residenceAddress.apartment)",
-                                  "component": "$component(Input)",
+                                  "component": "$component(Textbox)",
                                   "componentProps": {
                                     "label": "Квартира",
                                     "placeholder": "№"
@@ -596,7 +596,7 @@
                                 },
                                 {
                                   "value": "$model(residenceAddress.postalCode)",
-                                  "component": "$component(InputMask)",
+                                  "component": "$component(TextboxMasked)",
                                   "componentProps": {
                                     "label": "Индекс",
                                     "placeholder": "000000",
@@ -637,7 +637,7 @@
                       "children": [
                         {
                           "value": "$model(employmentStatus)",
-                          "component": "$component(RadioGroup)",
+                          "component": "$component(Radio)",
                           "componentProps": {
                             "label": "Статус занятости",
                             "options": "$dataSource(EMPLOYMENT_STATUSES)"
@@ -656,7 +656,7 @@
                       "children": [
                         {
                           "value": "$model(companyName)",
-                          "component": "$component(Input)",
+                          "component": "$component(Textbox)",
                           "componentProps": {
                             "label": "Название компании",
                             "placeholder": "Введите название"
@@ -670,7 +670,7 @@
                           "children": [
                             {
                               "value": "$model(companyInn)",
-                              "component": "$component(InputMask)",
+                              "component": "$component(TextboxMasked)",
                               "componentProps": {
                                 "label": "ИНН компании",
                                 "placeholder": "1234567890",
@@ -679,7 +679,7 @@
                             },
                             {
                               "value": "$model(companyPhone)",
-                              "component": "$component(InputMask)",
+                              "component": "$component(TextboxMasked)",
                               "componentProps": {
                                 "label": "Телефон компании",
                                 "placeholder": "+7 (___) ___-__-__",
@@ -690,7 +690,7 @@
                         },
                         {
                           "value": "$model(companyAddress)",
-                          "component": "$component(Input)",
+                          "component": "$component(Textbox)",
                           "componentProps": {
                             "label": "Адрес компании",
                             "placeholder": "Полный адрес"
@@ -706,7 +706,7 @@
                           "children": [
                             {
                               "value": "$model(position)",
-                              "component": "$component(Input)",
+                              "component": "$component(Textbox)",
                               "componentProps": {
                                 "label": "Должность",
                                 "placeholder": "Ваша должность"
@@ -720,7 +720,7 @@
                               "children": [
                                 {
                                   "value": "$model(workExperienceTotal)",
-                                  "component": "$component(Input)",
+                                  "component": "$component(Textbox)",
                                   "componentProps": {
                                     "label": "Общий стаж работы (месяцев)",
                                     "placeholder": "0",
@@ -730,7 +730,7 @@
                                 },
                                 {
                                   "value": "$model(workExperienceCurrent)",
-                                  "component": "$component(Input)",
+                                  "component": "$component(Textbox)",
                                   "componentProps": {
                                     "label": "Стаж на текущем месте (месяцев)",
                                     "placeholder": "0",
@@ -755,7 +755,7 @@
                       "children": [
                         {
                           "value": "$model(businessType)",
-                          "component": "$component(Input)",
+                          "component": "$component(Textbox)",
                           "componentProps": {
                             "label": "Тип бизнеса",
                             "placeholder": "ИП, ООО и т.д."
@@ -763,7 +763,7 @@
                         },
                         {
                           "value": "$model(businessInn)",
-                          "component": "$component(InputMask)",
+                          "component": "$component(TextboxMasked)",
                           "componentProps": {
                             "label": "ИНН ИП",
                             "placeholder": "123456789012",
@@ -792,7 +792,7 @@
                       "children": [
                         {
                           "value": "$model(monthlyIncome)",
-                          "component": "$component(Input)",
+                          "component": "$component(Textbox)",
                           "componentProps": {
                             "label": "Ежемесячный доход (₽)",
                             "placeholder": "0",
@@ -809,7 +809,7 @@
                           "children": [
                             {
                               "value": "$model(additionalIncome)",
-                              "component": "$component(Input)",
+                              "component": "$component(Textbox)",
                               "componentProps": {
                                 "label": "Дополнительный доход (₽)",
                                 "placeholder": "0",
@@ -820,7 +820,7 @@
                             },
                             {
                               "value": "$model(additionalIncomeSource)",
-                              "component": "$component(Input)",
+                              "component": "$component(Textbox)",
                               "componentProps": {
                                 "label": "Источник дополнительного дохода",
                                 "placeholder": "Опишите источник"
@@ -867,7 +867,7 @@
                       "children": [
                         {
                           "value": "$model(maritalStatus)",
-                          "component": "$component(RadioGroup)",
+                          "component": "$component(Radio)",
                           "componentProps": {
                             "label": "Семейное положение",
                             "options": "$dataSource(MARITAL_STATUSES)"
@@ -881,7 +881,7 @@
                           "children": [
                             {
                               "value": "$model(dependents)",
-                              "component": "$component(Input)",
+                              "component": "$component(Textbox)",
                               "componentProps": {
                                 "label": "Количество иждивенцев",
                                 "placeholder": "0",
@@ -903,7 +903,7 @@
                         },
                         {
                           "value": "$model(documents)",
-                          "component": "$component(FileUpload)",
+                          "component": "$component(Uploader)",
                           "componentProps": {
                             "label": "Документы",
                             "variant": "dropzone",
@@ -1001,7 +1001,7 @@
                                 },
                                 {
                                   "value": "$model(estimatedValue)",
-                                  "component": "$component(Input)",
+                                  "component": "$component(Textbox)",
                                   "componentProps": {
                                     "label": "Оценочная стоимость",
                                     "placeholder": "0",
@@ -1066,7 +1066,7 @@
                               "children": [
                                 {
                                   "value": "$model(bank)",
-                                  "component": "$component(Input)",
+                                  "component": "$component(Textbox)",
                                   "componentProps": {
                                     "label": "Банк",
                                     "placeholder": "Название банка",
@@ -1091,7 +1091,7 @@
                                   "children": [
                                     {
                                       "value": "$model(amount)",
-                                      "component": "$component(Input)",
+                                      "component": "$component(Textbox)",
                                       "componentProps": {
                                         "label": "Сумма кредита (₽)",
                                         "placeholder": "0",
@@ -1103,7 +1103,7 @@
                                     },
                                     {
                                       "value": "$model(remainingAmount)",
-                                      "component": "$component(Input)",
+                                      "component": "$component(Textbox)",
                                       "componentProps": {
                                         "label": "Остаток долга (₽)",
                                         "placeholder": "0",
@@ -1123,7 +1123,7 @@
                                   "children": [
                                     {
                                       "value": "$model(monthlyPayment)",
-                                      "component": "$component(Input)",
+                                      "component": "$component(Textbox)",
                                       "componentProps": {
                                         "label": "Ежемесячный платеж (₽)",
                                         "placeholder": "0",
@@ -1135,7 +1135,7 @@
                                     },
                                     {
                                       "value": "$model(maturityDate)",
-                                      "component": "$component(Input)",
+                                      "component": "$component(Textbox)",
                                       "componentProps": {
                                         "label": "Дата погашения",
                                         "type": "date",
@@ -1202,7 +1202,7 @@
                                   "children": [
                                     {
                                       "value": "$model(personalData.lastName)",
-                                      "component": "$component(Input)",
+                                      "component": "$component(Textbox)",
                                       "componentProps": {
                                         "label": "Фамилия",
                                         "placeholder": "Введите фамилию",
@@ -1211,7 +1211,7 @@
                                     },
                                     {
                                       "value": "$model(personalData.firstName)",
-                                      "component": "$component(Input)",
+                                      "component": "$component(Textbox)",
                                       "componentProps": {
                                         "label": "Имя",
                                         "placeholder": "Введите имя",
@@ -1220,7 +1220,7 @@
                                     },
                                     {
                                       "value": "$model(personalData.middleName)",
-                                      "component": "$component(Input)",
+                                      "component": "$component(Textbox)",
                                       "componentProps": {
                                         "label": "Отчество",
                                         "placeholder": "Введите отчество",
@@ -1231,7 +1231,7 @@
                                 },
                                 {
                                   "value": "$model(personalData.birthDate)",
-                                  "component": "$component(Input)",
+                                  "component": "$component(Textbox)",
                                   "componentProps": {
                                     "label": "Дата рождения",
                                     "type": "date",
@@ -1246,7 +1246,7 @@
                                   "children": [
                                     {
                                       "value": "$model(phone)",
-                                      "component": "$component(InputMask)",
+                                      "component": "$component(TextboxMasked)",
                                       "componentProps": {
                                         "label": "Телефон",
                                         "placeholder": "+7 (___) ___-__-__",
@@ -1256,7 +1256,7 @@
                                     },
                                     {
                                       "value": "$model(email)",
-                                      "component": "$component(Input)",
+                                      "component": "$component(Textbox)",
                                       "componentProps": {
                                         "label": "Email",
                                         "placeholder": "example@mail.com",
@@ -1284,7 +1284,7 @@
                                     },
                                     {
                                       "value": "$model(monthlyIncome)",
-                                      "component": "$component(Input)",
+                                      "component": "$component(Textbox)",
                                       "componentProps": {
                                         "label": "Ежемесячный доход (₽)",
                                         "placeholder": "0",
@@ -1406,7 +1406,7 @@
                       "children": [
                         {
                           "value": "$model(electronicSignature)",
-                          "component": "$component(InputMask)",
+                          "component": "$component(TextboxMasked)",
                           "componentProps": {
                             "label": "Код подтверждения из СМС",
                             "placeholder": "123456",
