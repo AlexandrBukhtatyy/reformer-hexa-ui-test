@@ -14,6 +14,7 @@
           "className": "bg-white p-4 rounded-lg shadow-md md:p-8 overflow-x-auto",
           "steps": [
             {
+              "selector": "loan-step",
               "component": "$component(Step)",
               "componentProps": {
                 "title": "Кредит",
@@ -174,6 +175,7 @@
               ]
             },
             {
+              "selector": "personal-step",
               "component": "$component(Step)",
               "componentProps": {
                 "title": "Данные",
@@ -374,6 +376,7 @@
               ]
             },
             {
+              "selector": "contacts-step",
               "component": "$component(Step)",
               "componentProps": {
                 "title": "Контакты",
@@ -614,6 +617,7 @@
               ]
             },
             {
+              "selector": "employment-step",
               "component": "$component(Step)",
               "componentProps": {
                 "title": "Работа",
@@ -842,6 +846,7 @@
               ]
             },
             {
+              "selector": "additional-step",
               "component": "$component(Step)",
               "componentProps": {
                 "title": "Доп. инфо",
@@ -1307,6 +1312,7 @@
               ]
             },
             {
+              "selector": "confirm-step",
               "component": "$component(Step)",
               "componentProps": {
                 "title": "Подтверждение",

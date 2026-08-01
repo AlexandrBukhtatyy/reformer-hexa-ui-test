@@ -1,16 +1,15 @@
 /**
  * M1: модель данных кредитной заявки (источник истины значений).
  *
- * `createCreditApplicationModel()` строит реактивную {@link FormModel} из начальных значений.
- * Значения принадлежат модели; ноды формы лишь ссылаются на её сигналы, поэтому набор ключей здесь
- * задаёт и набор биндингов схемы: лист `$model(path)`, которому в снимке не нашлось значения,
- * не получит сигнала и не отрисуется.
+ * `createInitialCreditApplication()` отдаёт начальный СНИМОК — саму модель из него строит
+ * `useJsonForm` (опция `initial`). Значения принадлежат модели; ноды формы лишь ссылаются на её
+ * сигналы, поэтому набор ключей здесь задаёт и набор биндингов схемы: лист `$model(path)`,
+ * которому в снимке не нашлось значения, не получит сигнала и не отрисуется.
  *
  * Здесь же — фабрики «пустых» элементов массивов: при добавлении нового элемента нужно передать
  * ПОЛНЫЙ объект (все поля), иначе под-модель элемента не получит сигналов для полей схемы.
  */
 
-import { createModel, type FormModel } from "@reformer/core";
 import type {
   CoBorrower,
   CreditApplicationForm,
@@ -128,11 +127,6 @@ export const createInitialCreditApplication = (): CreditApplicationForm =>
     coBorrowersIncome: 0,
     sameEmail: false,
   }) as unknown as CreditApplicationForm;
-
-/** Создать реактивную модель кредитной заявки. */
-export const createCreditApplicationModel =
-  (): FormModel<CreditApplicationForm> =>
-    createModel<CreditApplicationForm>(createInitialCreditApplication());
 
 // ============================================================================
 // Фабрики «пустых» элементов массивов (полный объект — все поля обязательны)

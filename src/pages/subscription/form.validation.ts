@@ -1,21 +1,19 @@
-/**
+﻿/**
  * Схема валидации формы «subscription» — правила над МОДЕЛЬЮ (не в JSON-схеме формы).
  * Docs: @reformer/core/validation.
  *
  * Форма многошаговая, поэтому правила разложены по шагам: `validateStep` гоняет схему своего шага
  * на «Далее», `validateAll` — их композицию перед «Готово». Обе функции инъектируются в wizard
- * через ui.ts — в JSON рантайм-колбэки не выразить.
+ * через ui.behavior.ts — в JSON рантайм-колбэки не выразить.
+ *
+ * Шаг адресуется `selector`'ом своей ноды из form.json (см. defineSteps), а не порядковым номером:
+ * по номеру вставка шага в середину схемы молча сдвинула бы все правила на один вперёд.
  */
-import type { FormModel, FormProxy } from "@reformer/core";
-import {
-  apply,
-  defineValidationSchema,
-  validate,
-  validateModel,
-  type ValidationSchema,
-} from "@reformer/core/validation";
+import { defineValidationSchema, validate } from "@reformer/core/validation";
 import { email, minLength, required } from "@reformer/core/validators";
+import { defineSteps, noStepRules } from "../../libs/reformer/defineSteps";
 import type { FormShape } from "./form.model";
+import type { FormSelector } from "./form.selectors";
 
 const planStep = defineValidationSchema<FormShape>(({ model }) => {
   validate(model.$.plan, [required({ message: "Выберите тариф из списка" })]);
@@ -33,34 +31,17 @@ const contactsStep = defineValidationSchema<FormShape>(({ model }) => {
   validate(model.$.company, [required({ message: "Укажите компанию" })]);
 });
 
-/** Индекс = номер шага − 1. Последний шаг — сводка, своих правил не несёт. */
-const STEP_SCHEMAS: readonly ValidationSchema<FormShape>[] = [
-  planStep,
-  contactsStep,
-];
-
-// Схемы — стабильные module-level const: `validateModel` отменяет устаревший прогон по
-// идентичности схемы, инлайн-стрелка каждый раз давала бы новый прогон без дедупликации.
-const fullSchema = defineValidationSchema<FormShape>(() =>
-  apply(planStep, contactsStep),
-);
-const emptySchema: ValidationSchema<FormShape> = () => {};
-
 /**
  * Контракт, который читает wizard: `validateStep(step)` на «Далее», `validateAll()` перед «Готово».
  * Обе возвращают `false` → переход не состоится.
+ *
+ * Последний шаг — сводка, своих правил не несёт, и это сказано ЯВНО: пропущенный ключ и шаг без
+ * правил раньше выглядели одинаково — валидными.
  */
-export function makeValidationConfig(
-  model: FormModel<FormShape>,
-  form: FormProxy<FormShape>,
-) {
-  return {
-    validateStep: async (step: number): Promise<boolean> => {
-      // Без touched поле с ошибкой её не покажет (`shouldShowError = invalid && (touched || dirty)`),
-      // и переход молча заблокировался бы без единой подсветки.
-      form.markAsTouched();
-      return validateModel(model, STEP_SCHEMAS[step - 1] ?? emptySchema);
-    },
-    validateAll: (): Promise<boolean> => validateModel(model, fullSchema),
-  };
-}
+export const makeValidationConfig = defineSteps<FormShape, FormSelector>({
+  steps: {
+    "plan-step": planStep,
+    "contacts-step": contactsStep,
+    "confirm-step": noStepRules,
+  },
+});

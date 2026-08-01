@@ -3,7 +3,9 @@
  *
  * Роль узла решает его структура в схеме, а не регистрация: лист несёт `value: $model(...)`,
  * контейнер — `children`, массив — `item`. Поэтому одним `reg.component` регистрируются
- * и контролы, и обёртки, и узлы-массивы.
+ * и контролы, и обёртки, и узлы-массивы. Контролы всё же выделены в таблицу {@link CONTROLS}:
+ * у них, в отличие от обёрток, есть вторая обязанность — адаптер seam'а, и держать её отдельным
+ * списком значило регулярно про неё забывать (см. `control.ts`).
  *
  * Имена — «родные» для моста: как называется компонент hexa-ui (`Textbox`, `Radio`, `Select`,
  * `Uploader`, `Card`) либо, если у hexa-ui такого понятия нет, как называется наша обёртка
@@ -25,7 +27,13 @@ import {
   type ComponentRegistry,
   type RegistryBuilder,
 } from '@reformer/renderer-json';
-import type { FieldAdapter, RendererSettings } from '@reformer/renderer-react';
+import {
+  NO_ADAPTER,
+  control,
+  createFieldAdapterResolver,
+  registerControls,
+  type ControlEntry,
+} from './control';
 import { HexaAsyncBoundary } from './HexaAsyncBoundary';
 import { HexaBox } from './HexaBox';
 import { HexaCard } from './HexaCard';
@@ -60,21 +68,34 @@ import {
   RELATIONSHIPS,
 } from '../../pages/credit-application/constants';
 
-/** Компоненты моста: то, что умеет рисовать любая форма проекта. */
-function registerBridge(reg: RegistryBuilder): void {
-  // --- Контролы: лист схемы (`value: "$model(...)"`) → контрол hexa-ui. ---
-  //
+/**
+ * Контролы: лист схемы (`value: "$model(...)"`) → контрол hexa-ui.
+ *
+ * Единственный источник правды сразу для двух вещей — регистрации в реестре и карты адаптеров
+ * ({@link resolveFieldAdapter}). Раньше это были два независимых списка, и контрол, попавший
+ * только в первый, молча тёк нодой формы в DOM.
+ *
+ * Адаптер нужен почти каждому контролу, даже value-based: без него рендерер подмешивает в контрол
+ * проп `control` (ноду формы). Исключение одно и помечено {@link NO_ADAPTER} — `HexaSelect`.
+ */
+const CONTROLS: readonly ControlEntry[] = [
   // Под именем `Textbox` живёт обёртка, а не сырой компонент: схема различает текст, число и дату
   // одним пропом `type`, а hexa-ui — тремя разными компонентами. Разводит их `HexaInput`.
-  reg.component('Textbox', HexaInput);
-  reg.component('TextboxMasked', HexaInputMask);
-  reg.component('Textarea', HexaTextarea);
-  reg.component('Select', HexaSelect);
-  reg.component('Checkbox', HexaCheckbox);
-  reg.component('Uploader', HexaUploader);
+  control('Textbox', HexaInput, INPUT_ADAPTER),
+  control('TextboxMasked', HexaInputMask, INPUT_MASK_ADAPTER),
+  control('Textarea', HexaTextarea, TEXTAREA_ADAPTER),
+  // Селекту нода формы нужна самому: реактивные опции живут на ней, а не в пропах из схемы.
+  control('Select', HexaSelect, NO_ADAPTER),
+  control('Checkbox', HexaCheckbox, CHECKBOX_ADAPTER),
+  control('Uploader', HexaUploader, UPLOADER_ADAPTER),
   // Radio — сырой antd-`Radio.Group`: его диалект (значение в DOM-событии) переводит адаптер,
   // обёртка не нужна и стоила бы лишний ре-рендер на каждое нажатие.
-  reg.component('Radio', Radio);
+  control('Radio', Radio, RADIO_ADAPTER),
+];
+
+/** Компоненты моста: то, что умеет рисовать любая форма проекта. */
+function registerBridge(reg: RegistryBuilder): void {
+  registerControls(reg, CONTROLS);
 
   // --- Контейнеры: узел с `children`. ---
   reg.component('Box', HexaBox);
@@ -158,23 +179,10 @@ export function registerHexaComponents(reg: RegistryBuilder): void {
 export const hexaRegistry: ComponentRegistry = defineRegistry(registerHexaComponents);
 
 /**
- * Адаптеры ключуются по ССЫЛКЕ на компонент — резолвер получает уже РЕЗОЛВНУТЫЙ компонент
- * (тот, что реестр вернул на `$component(...)`), а не имя из схемы.
+ * Резолв адаптера для настроек рендерера — из той же таблицы {@link CONTROLS}.
  *
- * Адаптер нужен почти каждому контролу, даже value-based: без него рендерер подмешивает в контрол
- * проп `control` (ноду формы), и тот утекает в DOM. Исключение одно — `HexaSelect`: ему нода нужна
- * (реактивные опции из `updateComponentProps` живут на ней, а не в пропах из схемы), поэтому он
- * принимает `control` сам и гасит лишние пропы вручную.
+ * Ключ — ССЫЛКА на компонент: резолвер получает уже РЕЗОЛВНУТЫЙ компонент (тот, что реестр вернул
+ * на `$component(...)`), а не имя из схемы. Поэтому страница со своим реестром поверх моста
+ * переиспользует адаптеры сама, ничего не перерегистрируя.
  */
-const FIELD_ADAPTERS = new Map<unknown, FieldAdapter>([
-  [Radio, RADIO_ADAPTER],
-  [HexaInput, INPUT_ADAPTER],
-  [HexaInputMask, INPUT_MASK_ADAPTER],
-  [HexaTextarea, TEXTAREA_ADAPTER],
-  [HexaCheckbox, CHECKBOX_ADAPTER],
-  [HexaUploader, UPLOADER_ADAPTER],
-]);
-
-export const resolveFieldAdapter: NonNullable<
-  RendererSettings['resolveFieldAdapter']
-> = (component) => FIELD_ADAPTERS.get(component);
+export const resolveFieldAdapter = createFieldAdapterResolver(CONTROLS);

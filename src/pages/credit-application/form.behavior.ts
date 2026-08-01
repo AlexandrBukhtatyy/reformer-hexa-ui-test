@@ -66,7 +66,7 @@ interface Clearable {
  *
  * Колбэк `onChange` core запускает ВНЕ effect-контекста (микротаск/таймер), поэтому писать ноды
  * (`updateComponentProps`/`reset`) отсюда безопасно — ручной `defer`/`queueMicrotask` нужен только
- * там, где `updateComponentProps` идёт в одном тике с `form.patchValue` (загрузка заявки в ui.ts),
+ * там, где `updateComponentProps` идёт в одном тике с `form.patchValue` (загрузка заявки в ui.behavior.ts),
  * иначе preact бросает «Cycle detected».
  *
  * @example

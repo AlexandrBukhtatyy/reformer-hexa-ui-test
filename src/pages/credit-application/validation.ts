@@ -8,26 +8,25 @@
  * Каждый шаг — `ValidationSchema<Root>` (обычная функция `({ model }) => void`): значения проверяются
  * оператором `validate(sig, [rules])`, async — `validateAsync(sig, [asyncRules])`, условные ветки —
  * `validateWhen(cond, cb)`, cross-field — `cross(sig, fn)` (fn читает снапшот `model.get()`), массивы —
- * `each(arr, itemFn)`. Композиция формы — `apply(...шаги, fullExtras)`. Внешний раннер — `validateModel`.
+ * `each(arr, itemFn)`. Композиция шагов в форму и внешний раннер (`apply`/`validateModel`) спрятаны
+ * в `defineSteps` — здесь остаются только правила и их привязка к шагам.
  *
  * Правила поля (`required`/`min`/…) переиспользуются как есть (value-only). Cross-field — обычные функции
  * `(f: Root) => ValidationError | null`; для элементов массива снапшот захватывается в замыкание (`im.get()`),
  * т.к. `cross` всегда отдаёт модель ТЕКУЩЕГО scope (корень прогона), а не под-модель элемента.
  *
- * Наружу — один `makeCreditValidationConfig(model, form)` → `{ validateStep, validateAll }`; ui.ts
- * инъектирует эту пару в ноду визарда (`HexaWizard` принимает их плоскими пропами).
+ * Наружу — один `makeCreditValidationConfig(model, form)` → `{ validateStep, validateAll }`;
+ * ui.behavior.ts инъектирует эту пару в ноду визарда (`HexaWizard` принимает их плоскими пропами).
  */
 
-import type { FormModel, FormProxy, ValidationError } from "@reformer/core";
+import type { FormModel, ValidationError } from "@reformer/core";
 import {
   validate,
   validateAsync,
   validateWhen,
   cross,
   each,
-  apply,
   defineValidationSchema,
-  validateModel,
   type Rule,
   type AsyncRule,
   type ValidationSchema,
@@ -44,6 +43,8 @@ import {
   maxAge,
   pastDate,
 } from "@reformer/core/validators";
+import { defineSteps } from "../../libs/reformer/defineSteps";
+import type { CreditSelector } from "./form.selectors";
 import type {
   Address,
   CoBorrower,
@@ -53,7 +54,6 @@ import type {
 } from "./form.types";
 
 type Root = CreditApplicationForm;
-type M = FormModel<CreditApplicationForm>;
 
 // Считается один раз при загрузке модуля: год выпуска авто сверяется с ним, и в живущей сутками
 // вкладке граница не сдвинется — для демо это допустимо.
@@ -655,51 +655,27 @@ const fullExtras = defineValidationSchema<Root>(({ model }) => {
 // Публичный контракт для визарда
 // ============================================================================
 
-const STEP_SCHEMAS: readonly ValidationSchema<Root>[] = [
-  step1,
-  step2,
-  step3,
-  step4,
-  step5,
-  step6,
-];
-
-/** Полная схема: все шаги + form-level cross-field/warnings. */
-const fullSchema = defineValidationSchema<Root>(() =>
-  apply(...STEP_SCHEMAS, fullExtras),
-);
-
-/** Пустая схема — для шага вне диапазона (гасит ранее тронутые поля, возвращает valid). */
-const emptySchema: ValidationSchema<Root> = () => {};
-
 /**
  * Конфиг валидации для визарда: `validateStep(step)` на «Далее», `validateAll()` перед «Готово».
  * Обе возвращают `false` → переход не состоится. Ошибки разносятся по нодам формы,
  * `severity: 'warning'` не блокирует.
  *
- * Схемы — стабильные module-level `const`-ссылки: `validateModel` отменяет устаревший прогон
- * по идентичности пары (model, schema), инлайн-стрелка каждый раз давала бы новый прогон.
+ * Ключ — `selector` ноды шага из form.json, а не его номер: индекс (`STEP_SCHEMAS[step - 1]`)
+ * молчал на любом расхождении — вставленный шаг сдвигал правила, шаг без правил проходил как
+ * валидный. `markAsTouched` (без него ошибки невидимы, и «Далее» просто «не работает») и пустая
+ * схема для неизвестного шага теперь внутри `defineSteps` — забыть их негде.
  *
- * `form` вторым аргументом (в отличие от ui-kit-версии, где был только `model`): без `touched`
- * поле с ошибкой её не покажет (`shouldShowError = invalid && (touched || dirty)` в `HexaField`),
- * и переход молча заблокировался бы без единой подсветки.
+ * `fullExtras` идёт в `extras`: эти cross-field/warning'и принадлежат форме целиком и прогоняются
+ * только на «Готово».
  */
-export function makeCreditValidationConfig(
-  model: M,
-  form: FormProxy<CreditApplicationForm>,
-) {
-  return {
-    validateStep: async (step: number): Promise<boolean> => {
-      form.markAsTouched();
-      // Шаг 1-based: hexa-визард отдаёт сюда `index + 1`. Вне диапазона — пустая схема:
-      // она гасит ранее показанные ошибки и не блокирует переход.
-      return validateModel(model, STEP_SCHEMAS[step - 1] ?? emptySchema);
-    },
-    validateAll: async (): Promise<boolean> => {
-      // Правила `fullExtras` висят на вычисляемых полях (age/monthlyPayment/…), которые
-      // пользователь руками не трогал, — без markAsTouched их ошибки остались бы невидимыми.
-      form.markAsTouched();
-      return validateModel(model, fullSchema);
-    },
-  };
-}
+export const makeCreditValidationConfig = defineSteps<Root, CreditSelector>({
+  steps: {
+    "loan-step": step1,
+    "personal-step": step2,
+    "contacts-step": step3,
+    "employment-step": step4,
+    "additional-step": step5,
+    "confirm-step": step6,
+  },
+  extras: fullExtras,
+});

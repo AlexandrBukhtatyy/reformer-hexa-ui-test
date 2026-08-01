@@ -12,7 +12,7 @@ export interface FormShape {
 
 /** Начальные значения — для createForm/useFormControl. */
 export const initialFormModel: FormShape = {
-  name: '',
-  email: '',
-  greeting: '',
+  name: "",
+  email: "",
+  greeting: "",
 };

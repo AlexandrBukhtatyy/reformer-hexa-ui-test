@@ -8,63 +8,51 @@
  * - [behavior.ts]    — реактивность модели (`createForm({ behavior })`);
  * - [ui.ts]          — render-behavior поверх дерева рендера (hideWhen/patchProps/onInit).
  *
- * Провайдеры и мост к hexa-ui — в `layouts/FormLayout` и `libs/hexa-ui`: страница про них не знает.
- * Вся сборка и поведение — в `useRegistrationForm`; компонент остаётся чистым представлением.
+ * Сборка (модель + форма + render-behavior) и статус отправки — общие для всех форм проекта:
+ * `libs/reformer/useJsonForm`. Провайдеры и мост к hexa-ui — в `layouts/FormLayout` и
+ * `libs/hexa-ui`: страница про них не знает. Своё здесь — только обработчики и разметка.
  */
 
-import { useMemo, useRef, useState } from 'react';
-import { createForm, createModel, useFormControlValue, type FieldNode } from '@reformer/core';
+import { useFormControlValue, type FieldNode } from '@reformer/core';
 import { validateModel } from '@reformer/core/validation';
 import { Button } from '@kaspersky/hexa-ui';
-import { JsonFormRenderer, convertJsonToM1Tree, type JsonFormSchema } from '@reformer/renderer-json';
+import { JsonFormRenderer } from '@reformer/renderer-json';
 import { FormLayout } from '../../layouts/FormLayout';
-import { hexaRegistry } from '../../libs/hexa-ui';
+import {
+  asJsonFormSchema,
+  useFormStatus,
+  useJsonForm,
+  type UiBehaviorFactory,
+} from '../../libs/reformer/useJsonForm';
 import rawJsonSchema from './form.json';
-import { formBehavior } from './behavior';
-import { initialFormModel, type FormShape } from './model';
-import { formUiBehavior } from './ui';
-import { formValidation } from './validation';
+import { formBehavior } from './form.behavior';
+import { initialFormModel, type FormShape } from './form.model';
+import { formUiBehavior } from './ui.behavior';
+import { formValidation } from './form.validation';
 
-// Операторы в чистом JSON типизируются как `string` — приведение и есть сценарий
-// «схема пришла строкой с сервера».
-const registrationJsonSchema = rawJsonSchema as unknown as JsonFormSchema;
+const registrationJsonSchema = asJsonFormSchema(rawJsonSchema);
 
-interface FormStatus {
-  kind: 'success' | 'error';
-  text: string;
-}
+// Render-behavior этой формы статичен — на модель он не замыкается. Обёртку в фабрику держим
+// модульной константой: инлайн-стрелка была бы новой ссылкой на каждый рендер, а на новый
+// render-behavior рендерер пересобирает дерево.
+const registrationUi: UiBehaviorFactory<FormShape> = () => formUiBehavior;
 
 /**
  * Всё, что нужно форме, кроме её внешнего вида: модель, ноды, состояние отправки и обработчики.
  * Компонент вызывает хук и только раскладывает результат по разметке.
  */
 function useRegistrationForm() {
-  // Один раз: пересборка создала бы новую модель, и форма теряла бы введённое на каждый рендер.
-  const { model, form } = useMemo(() => {
-    const model = createModel<FormShape>({ ...initialFormModel });
-    // Форма строится из ТОЙ ЖЕ JSON-схемы: конвертер биндит листья к сигналам модели.
-    // Без этого вызова рендерер не найдёт ноду для сигнала и не отрисует поля.
-    const form = createForm<FormShape>({
-      model,
-      schema: convertJsonToM1Tree(registrationJsonSchema, hexaRegistry, model),
-      behavior: formBehavior,
-    });
+  const { model, form, renderBehavior } = useJsonForm<FormShape>({
+    schema: registrationJsonSchema,
+    initial: initialFormModel,
+    behavior: formBehavior,
+    ui: registrationUi,
+  });
 
-    return { model, form };
-  }, []);
+  const { status, setStatus, pending, run } = useFormStatus();
 
-  const [status, setStatus] = useState<FormStatus | null>(null);
-  const [pending, setPending] = useState(false);
-  // Флаг дублируется в ref: два клика в одном кадре придут из одного рендера, где `pending`
-  // ещё false, — на одном state такую пару не отсечь.
-  const pendingRef = useRef(false);
-
-  const submit = async (): Promise<void> => {
-    if (pendingRef.current) return;
-    pendingRef.current = true;
-    setPending(true);
-
-    try {
+  const submit = (): void => {
+    void run(async () => {
       // Без touched ноды не показывают ошибки — невалидные поля молча не отправились бы.
       form.markAsTouched();
       const valid = await validateModel(model, formValidation);
@@ -73,24 +61,22 @@ function useRegistrationForm() {
           ? { kind: 'success', text: 'Форма отправлена' }
           : { kind: 'error', text: 'Проверьте выделенные поля' },
       );
-    } finally {
-      pendingRef.current = false;
-      setPending(false);
-    }
+    });
   };
 
   const reset = (): void => {
-    // Тот же guard, что у submit: иначе хвост незавершённой отправки поставил бы статус
-    // уже после очистки, и на пустой форме повисло бы «Проверьте выделенные поля».
-    if (pendingRef.current) return;
-    // Значения принадлежат модели, UI-состояние — форме: чистим порознь.
-    model.reset();
-    form.clearErrors();
-    form.markAsUntouched();
-    setStatus(null);
+    // Тот же guard, что у submit (он внутри `run`): иначе хвост незавершённой отправки поставил бы
+    // статус уже после очистки, и на пустой форме повисло бы «Проверьте выделенные поля».
+    void run(() => {
+      // Значения принадлежат модели, UI-состояние — форме: чистим порознь.
+      model.reset();
+      form.clearErrors();
+      form.markAsUntouched();
+      setStatus(null);
+    });
   };
 
-  return { model, greetingField: form.greeting, status, pending, submit, reset };
+  return { model, renderBehavior, greetingField: form.greeting, status, pending, submit, reset };
 }
 
 /**
@@ -104,14 +90,15 @@ function Greeting({ control }: { control: FieldNode<string> }) {
 }
 
 export default function Form() {
-  const { model, greetingField, status, pending, submit, reset } = useRegistrationForm();
+  const { model, renderBehavior, greetingField, status, pending, submit, reset } =
+    useRegistrationForm();
 
   return (
     <FormLayout>
       <JsonFormRenderer<FormShape>
         schema={registrationJsonSchema}
         model={model}
-        renderBehavior={formUiBehavior}
+        renderBehavior={renderBehavior}
         validateSchema={import.meta.env.DEV}
       />
 
@@ -123,7 +110,7 @@ export default function Form() {
           mode="primary"
           loading={pending}
           disabled={pending}
-          onClick={() => void submit()}
+          onClick={submit}
         />
         <Button text="Очистить" mode="secondary" disabled={pending} onClick={reset} />
       </div>

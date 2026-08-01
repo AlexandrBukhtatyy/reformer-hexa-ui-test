@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Поведение UI формы «subscription» — декларативные правила над деревом рендера по selector'ам из
  * form.json. Docs: @reformer/renderer-react render-behavior.
  *
@@ -11,8 +11,10 @@ import {
   onComponentEvent,
   onInit,
   type RenderBehaviorFn,
+  type RenderNodeControl,
 } from "@reformer/renderer-react";
 import type { FormShape } from "./form.model";
+import type { FormSelector } from "./form.selectors";
 import { makeValidationConfig } from "./form.validation";
 
 export interface FormUiBehaviorDeps {
@@ -34,7 +36,13 @@ export function createFormUiBehavior({
   onCancel,
 }: FormUiBehaviorDeps): RenderBehaviorFn<FormShape> {
   return (schema) => {
-    const wizard = schema.node("wizard");
+    // Единственное место, где selector превращается в ноду. Тип сужен до якорей схемы
+    // (form.selectors.ts): `schema.node` берёт любую строку, и опечатка была бы молчаливым
+    // no-op — правило просто не навесилось бы.
+    const node = (selector: FormSelector): RenderNodeControl =>
+      schema.node(selector);
+
+    const wizard = node("wizard");
     const { validateStep, validateAll } = makeValidationConfig(model, form);
 
     // onInit — единственный хук, чьи пропы попадают уже в первый рендер.
@@ -57,9 +65,6 @@ export function createFormUiBehavior({
     onComponentEvent(wizard, "onCancel", onCancel);
 
     // Условная секция — реактивно по сигналу формы (сигнал читается целиком).
-    hideWhen(
-      schema.node("promo-card"),
-      () => form.billing.value.value !== "yearly",
-    );
+    hideWhen(node("promo-card"), () => form.billing.value.value !== "yearly");
   };
 }

@@ -9,8 +9,9 @@
  *
  * Обязанности разведены так же, как в «registration» и «subscription»:
  * - [form.json]         — весь layout, включая шаги wizard'а (`componentProps.steps`);
- * - [types.ts]          — форма данных;
- * - [model.ts]          — initial-значения модели;
+ * - [form.types.ts]     — форма данных;
+ * - [form.model.ts]     — initial-значения модели;
+ * - [form.selectors.ts] — якоря схемы: ими адресуются и ноды в поведении, и шаги в валидации;
  * - [constants.ts]      — словари для `$dataSource(...)`;
  * - [compute.ts]        — чистые расчёты (ставка, платёж, возраст, доход);
  * - [api.ts]            — моки запросов, форма ответа `{ data, status }`;
@@ -19,30 +20,29 @@
  * - [components.tsx]    — витринные блоки шагов 3, 4 и 6;
  * - [ui.behavior.ts]    — render-behavior: загрузка, видимость, навигация, отправка.
  *
- * Своего реестра у страницы нет: и мост, и её витринные блоки со словарями живут в общем
- * `libs/hexa-ui/registry.ts`, который отдаёт `FormLayout`. Провайдер здесь один — контекст формы
- * для витринных блоков: hexa-ui `Wizard` не cdk'шный `FormWizard`, и `useFormWizard()` в нём не работает.
+ * Сборка модели, формы и render-behavior — общая: `libs/reformer/useJsonForm`. Своего реестра у
+ * страницы нет: и мост, и её витринные блоки со словарями живут в общем `libs/hexa-ui/registry.ts`,
+ * который отдаёт `FormLayout`. Провайдер здесь один — контекст формы для витринных блоков: hexa-ui
+ * `Wizard` не cdk'шный `FormWizard`, и `useFormWizard()` в нём не работает.
  */
 
-import { useMemo, useState } from 'react';
-import { createForm } from '@reformer/core';
-import {
-  JsonFormRenderer,
-  convertJsonToM1Tree,
-  type JsonFormSchema,
-} from '@reformer/renderer-json';
+import { useCallback } from 'react';
+import { JsonFormRenderer } from '@reformer/renderer-json';
 import { FormLayout } from '../../layouts/FormLayout';
-import { hexaRegistry } from '../../libs/hexa-ui';
+import {
+  asJsonFormSchema,
+  useFormStatus,
+  useJsonForm,
+  type UiBehaviorFactory,
+} from '../../libs/reformer/useJsonForm';
 import { creditApplicationBehavior } from './form.behavior';
 import { CreditFormProvider } from './form-context';
 import rawJsonSchema from './form.json';
-import { createCreditApplicationModel } from './form.model';
+import { createInitialCreditApplication } from './form.model';
 import type { CreditApplicationForm } from './form.types';
 import { createCreditUiBehavior, type CreditFormStatus } from './ui.behavior';
 
-// Операторы в чистом JSON типизируются как `string` — приведение и есть сценарий
-// «схема пришла строкой с сервера».
-const creditApplicationJsonSchema = rawJsonSchema as unknown as JsonFormSchema;
+const creditApplicationJsonSchema = asJsonFormSchema(rawJsonSchema);
 
 /** Цвет строки статуса: отправка идёт — нейтрально, отказ — красным, приём — зелёным. */
 const STATUS_CLASSNAME: Record<CreditFormStatus['kind'], string> = {
@@ -58,34 +58,28 @@ const STATUS_CLASSNAME: Record<CreditFormStatus['kind'], string> = {
  * через `JsonRendererProvider` — витринные блоки этой формы и её словари зарегистрированы там же.
  */
 function useCreditApplicationForm() {
-  // Один раз: пересборка создала бы новую модель, и форма теряла бы введённое.
-  const { model, form } = useMemo(() => {
-    const model = createCreditApplicationModel();
-    // Форма строится из ТОЙ ЖЕ JSON-схемы: конвертер биндит листья к сигналам модели.
-    // Листья шагов лежат в `componentProps.steps`, но обход схемы находит и их.
-    const form = createForm<CreditApplicationForm>({
-      model,
-      schema: convertJsonToM1Tree(creditApplicationJsonSchema, hexaRegistry, model),
-      behavior: creditApplicationBehavior,
-    });
+  // Своих kind'ов у заявки три: отправка идёт секунду, и нейтральный `pending` — часть статуса.
+  const { status, setStatus } = useFormStatus<CreditFormStatus>();
 
-    return { model, form };
-  }, []);
-
-  const [status, setStatus] = useState<CreditFormStatus | null>(null);
-
-  // Стабильная ссылка обязательна: новый renderBehavior на каждый рендер пересобирал бы схему.
-  // `setStatus` из useState стабилен, поэтому в зависимостях его нет.
-  const uiBehavior = useMemo(
-    () => createCreditUiBehavior({ model, form, onStatus: setStatus }),
-    [model, form],
+  // `setStatus` (сеттер useState) стабилен, поэтому стабильна и фабрика — а значит, и
+  // render-behavior: на новую функцию рендерер пересобрал бы дерево.
+  const ui = useCallback<UiBehaviorFactory<CreditApplicationForm>>(
+    ({ model, form }) => createCreditUiBehavior({ model, form, onStatus: setStatus }),
+    [setStatus],
   );
 
-  return { model, form, status, uiBehavior };
+  const { model, form, renderBehavior } = useJsonForm<CreditApplicationForm>({
+    schema: creditApplicationJsonSchema,
+    initial: createInitialCreditApplication,
+    behavior: creditApplicationBehavior,
+    ui,
+  });
+
+  return { model, form, renderBehavior, status };
 }
 
 export default function Form() {
-  const { model, form, status, uiBehavior } = useCreditApplicationForm();
+  const { model, form, renderBehavior, status } = useCreditApplicationForm();
 
   return (
     <FormLayout>
@@ -95,7 +89,7 @@ export default function Form() {
         <JsonFormRenderer<CreditApplicationForm>
           schema={creditApplicationJsonSchema}
           model={model}
-          renderBehavior={uiBehavior}
+          renderBehavior={renderBehavior}
           validateSchema={import.meta.env.DEV}
         />
       </CreditFormProvider>

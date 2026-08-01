@@ -2,29 +2,25 @@
  * Поведение формы «registration» — реактивные связи над МОДЕЛЬЮ (вычисляемые поля, копирование,
  * доступность, ре-валидация). Docs: @reformer/core/behaviors.
  *
- * Ниже — активное поведение под поля model.ts + шпаргалка частых случаев. Импорты покрывают все
- * примеры — лишнее удалите.
+ * Импортируется ровно то, что вызывается: tsc собран с `noUnusedLocals`, и «шпаргалка про запас»
+ * в импортах держала бы сборку красной постоянно — а постоянно красная сборка перестаёт что-либо
+ * значить. Примеры остальных операторов лежат ниже комментарием, вместе со строкой их импорта.
  */
-import {
-  defineFormBehavior,
-  compute,
-  computeFrom,
-  copyFrom,
-  syncFields,
-  onChange,
-  enableWhen,
-  disableWhen,
-  resetWhen,
-  revalidateWhen,
-} from '@reformer/core/behaviors';
-import type { FormShape } from './model';
+import { defineFormBehavior, computeFrom } from "@reformer/core/behaviors";
+import type { FormShape } from "./form.model";
 
 export const formBehavior = defineFormBehavior<FormShape>(({ model }) => {
   // ── Активное поведение ──
   // greeting вычисляется из name.
-  computeFrom([model.$.name], model.$.greeting, (name) => (name ? `Привет, ${name}!` : ''));
+  computeFrom([model.$.name], model.$.greeting, (name) =>
+    name ? `Привет, ${name}!` : "",
+  );
 
-  // ── Шпаргалка (скопируйте под свои поля) ──
+  // ── Шпаргалка (скопируйте под свои поля, добавив оператор в импорт наверху файла) ──
+  //
+  // import {
+  //   compute, copyFrom, syncFields, onChange, enableWhen, disableWhen, resetWhen, revalidateWhen,
+  // } from '@reformer/core/behaviors';
 
   // Вычисляемое поле (авто-трекинг зависимостей внутри read):
   // compute(model.$.total, () => model.price * model.qty);

@@ -24,6 +24,7 @@ import {
   onMount,
   renderEffect,
   type RenderBehaviorFn,
+  type RenderNodeControl,
 } from "@reformer/renderer-react";
 import type { HexaWizardHandle } from "../../libs/hexa-ui";
 import {
@@ -31,6 +32,7 @@ import {
   fetchDictionaries,
   submitCreditApplication,
 } from "./api";
+import type { CreditSelector } from "./form.selectors";
 import type { CreditApplicationForm } from "./form.types";
 import { makeCreditValidationConfig } from "./validation";
 
@@ -59,8 +61,14 @@ export function createCreditUiBehavior({
   onStatus,
 }: CreditUiBehaviorDeps): RenderBehaviorFn<CreditApplicationForm> {
   return (schema) => {
-    const wizard = schema.node("wizard");
-    const boundary = schema.node("data-boundary");
+    // Единственное место, где selector превращается в ноду. Тип сужен до якорей схемы
+    // (form.selectors.ts): `schema.node` берёт любую строку, и опечатка была бы молчаливым
+    // no-op — `hideWhen` на несуществующей ноде оставил бы секцию видимой без единой жалобы.
+    const node = (selector: CreditSelector): RenderNodeControl =>
+      schema.node(selector);
+
+    const wizard = node("wizard");
+    const boundary = node("data-boundary");
     // Ref — единственный способ дотянуться до навигации визарда: шагом владеет он сам.
     const wizardRef = wizard.getRef<HexaWizardHandle>();
 
@@ -139,51 +147,42 @@ export function createCreditUiBehavior({
     // Скрытие — только половина дела: скрытые поля продолжают валидироваться и уезжать в payload.
     // Вторую половину (disable + reset/clear) делает `behavior.ts`; обе нужны вместе.
     hideWhen(
-      schema.node("mortgage-section"),
+      node("mortgage-section"),
       () => form.loanType.value.value !== "mortgage",
     );
-    hideWhen(
-      schema.node("car-section"),
-      () => form.loanType.value.value !== "car",
-    );
+    hideWhen(node("car-section"), () => form.loanType.value.value !== "car");
 
     // ── Шаг 3: адреса ───────────────────────────────────────────────────────
     hideWhen(
-      schema.node("residence-address-section"),
+      node("residence-address-section"),
       () => form.sameAsRegistration.value.value === true,
     );
 
     // ── Шаг 4: занятость ────────────────────────────────────────────────────
     hideWhen(
-      schema.node("employer-section"),
+      node("employer-section"),
       () => form.employmentStatus.value.value !== "employed",
     );
     hideWhen(
-      schema.node("business-section"),
+      node("business-section"),
       () => form.employmentStatus.value.value !== "selfEmployed",
     );
     hideWhen(
-      schema.node("income-section"),
+      node("income-section"),
       () => form.employmentStatus.value.value === "unemployed",
     );
     hideWhen(
-      schema.node("unemployed-warning"),
+      node("unemployed-warning"),
       () => form.employmentStatus.value.value !== "unemployed",
     );
 
     // ── Шаг 5: дополнительные секции ────────────────────────────────────────
+    hideWhen(node("properties-array"), () => !form.hasProperty.value.value);
     hideWhen(
-      schema.node("properties-array"),
-      () => !form.hasProperty.value.value,
-    );
-    hideWhen(
-      schema.node("existing-loans-array"),
+      node("existing-loans-array"),
       () => !form.hasExistingLoans.value.value,
     );
-    hideWhen(
-      schema.node("co-borrowers-array"),
-      () => !form.hasCoBorrower.value.value,
-    );
+    hideWhen(node("co-borrowers-array"), () => !form.hasCoBorrower.value.value);
 
     // ── Шаг 6: отправка ─────────────────────────────────────────────────────
     // `onSubmit` — проп-событие моста: hexa-ui `onFinish` зовётся без аргументов, а значения

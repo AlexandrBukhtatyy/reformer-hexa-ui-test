@@ -2,41 +2,34 @@
  * Схема валидации формы «registration» — правила над МОДЕЛЬЮ (не в JSON-схеме формы).
  * Запуск: validateModel(model, formValidation). Docs: @reformer/core/validation.
  *
- * Ниже — активные правила под поля model.ts + шпаргалка частых случаев (раскомментируйте/
- * скопируйте под свои поля). Импорты покрывают все примеры — лишнее удалите.
+ * Импортируется ровно то, что вызывается: tsc собран с `noUnusedLocals`, и «шпаргалка про запас»
+ * в импортах держала бы сборку красной постоянно — а постоянно красная сборка перестаёт что-либо
+ * значить. Примеры остальных правил лежат ниже комментарием, вместе со строками их импорта.
  */
-import {
-  validate,
-  validateAsync,
-  validateWhen,
-  cross,
-  each,
-  apply,
-  defineValidationSchema,
-} from '@reformer/core/validation';
+import { validate, defineValidationSchema } from "@reformer/core/validation";
 import {
   required,
   email,
-  min,
-  max,
   minLength,
   maxLength,
-  pattern,
-  url,
-  phone,
-  isNumber,
-  integer,
-  multipleOf,
-  nonNegative,
-} from '@reformer/core/validators';
-import type { FormShape } from './model';
+} from "@reformer/core/validators";
+import type { FormShape } from "./form.model";
 
 export const formValidation = defineValidationSchema<FormShape>(({ model }) => {
   // ── Активные правила ──
-  validate(model.$.name, [required({ message: 'Укажите имя' }), minLength(2), maxLength(50)]);
+  validate(model.$.name, [
+    required({ message: "Укажите имя" }),
+    minLength(2),
+    maxLength(50),
+  ]);
   validate(model.$.email, [required(), email()]);
 
-  // ── Шпаргалка (скопируйте под свои поля) ──
+  // ── Шпаргалка (скопируйте под свои поля, добавив нужное в импорты наверху файла) ──
+  //
+  // import { validateAsync, validateWhen, cross, each, apply } from '@reformer/core/validation';
+  // import {
+  //   min, max, pattern, url, phone, isNumber, integer, multipleOf, nonNegative,
+  // } from '@reformer/core/validators';
 
   // Обязательное:
   // validate(model.$.field, [required({ message: 'Обязательное поле' })]);

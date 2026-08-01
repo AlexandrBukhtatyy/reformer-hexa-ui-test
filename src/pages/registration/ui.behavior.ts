@@ -5,9 +5,9 @@
  *
  * Ниже — шпаргалка частых случаев (раскомментируйте нужное + импорт хелпера).
  */
-import type { RenderBehaviorFn } from '@reformer/renderer-react';
+import type { RenderBehaviorFn } from "@reformer/renderer-react";
 // import { hideWhen, renderEffect, onComponentEvent, onInit, onMount, onUnmount } from '@reformer/renderer-react';
-import type { FormShape } from './model';
+import type { FormShape } from "./form.model";
 
 export const formUiBehavior: RenderBehaviorFn<FormShape> = (schema) => {
   // Скрыть узел по условию (реактивно — читай сигнал целиком):

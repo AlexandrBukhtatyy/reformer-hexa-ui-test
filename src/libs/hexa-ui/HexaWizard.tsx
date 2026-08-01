@@ -63,8 +63,17 @@ export interface HexaWizardProps<T>
   steps: ReadonlyArray<ContainerRenderNode<T>>;
   /** Форма — рантайм-сущность из render-behavior; нужна вложенным self-managed компонентам. */
   form?: FormProxy<T>;
-  /** Валидация шага (1-based) перед «Далее»; `false` оставляет пользователя на шаге. */
-  validateStep?: (step: number) => boolean | Promise<boolean>;
+  /**
+   * Валидация шага перед «Далее»; `false` оставляет пользователя на шаге.
+   *
+   * Шаг адресуется парой: `selector` его ноды — тот адрес, по которому правила объявлены
+   * (`defineSteps`), и 1-based `number` — fallback для схем, где у шага selector'а нет.
+   * Оба поля идут явно: по номеру связь молча разъезжается при вставке шага в середину схемы.
+   */
+  validateStep?: (step: {
+    selector?: string;
+    number: number;
+  }) => boolean | Promise<boolean>;
   /** Валидация всей формы перед `onFinish`. */
   validateAll?: () => boolean | Promise<boolean>;
   /**
@@ -157,7 +166,10 @@ export function HexaWizard<T>({
           // Собственный onNext ноды идёт первым: он может отменить переход до прогона правил.
           onNext: async () => {
             if ((await onNext?.()) === false) return false;
-            return validateStep ? await validateStep(index + 1) : true;
+            // Selector берём из самой ноды шага — он и есть ключ, по которому объявлены правила.
+            return validateStep
+              ? await validateStep({ selector: node.selector, number: index + 1 })
+              : true;
           },
           // Шаг рисуется как обычное поддерево — вместе с hideWhen/patchProps своих узлов.
           render: () => <RenderNodeComponent node={node} form={form} />,

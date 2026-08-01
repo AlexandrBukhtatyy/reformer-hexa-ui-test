@@ -10,7 +10,7 @@ export interface FormShape {
   contactName: string;
   email: string;
   company: string;
-  /** Виден только при годовой оплате (правило в ui.ts). */
+  /** Виден только при годовой оплате (правило в ui.behavior.ts). */
   promo: string;
   /** Пример вычисляемого поля (заполняется behavior.ts, показывается на шаге «Подтверждение»). */
   summary: string;
