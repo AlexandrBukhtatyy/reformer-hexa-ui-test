@@ -11,7 +11,7 @@
         "selector": "wizard",
         "component": "$component(RendererFormWizard)",
         "componentProps": {
-          "className": "bg-white p-8 rounded-lg shadow-md",
+          "className": "bg-white p-4 rounded-lg shadow-md md:p-8 overflow-x-auto",
           "steps": [
             {
               "component": "$component(Step)",
@@ -140,7 +140,7 @@
                         {
                           "component": "$component(Box)",
                           "componentProps": {
-                            "className": "grid grid-cols-2 gap-4"
+                            "className": "grid grid-cols-1 gap-4 md:grid-cols-2"
                           },
                           "children": [
                             {
@@ -200,7 +200,7 @@
                         {
                           "component": "$component(Box)",
                           "componentProps": {
-                            "className": "grid grid-cols-3 gap-4"
+                            "className": "grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3"
                           },
                           "children": [
                             {
@@ -232,7 +232,7 @@
                         {
                           "component": "$component(Box)",
                           "componentProps": {
-                            "className": "grid grid-cols-2 gap-4"
+                            "className": "grid grid-cols-1 gap-4 md:grid-cols-2"
                           },
                           "children": [
                             {
@@ -274,7 +274,7 @@
                         {
                           "component": "$component(Box)",
                           "componentProps": {
-                            "className": "grid grid-cols-2 gap-4"
+                            "className": "grid grid-cols-1 gap-4 md:grid-cols-2"
                           },
                           "children": [
                             {
@@ -309,7 +309,7 @@
                         {
                           "component": "$component(Box)",
                           "componentProps": {
-                            "className": "grid grid-cols-2 gap-4"
+                            "className": "grid grid-cols-1 gap-4 md:grid-cols-2"
                           },
                           "children": [
                             {
@@ -344,7 +344,7 @@
                         {
                           "component": "$component(Box)",
                           "componentProps": {
-                            "className": "grid grid-cols-2 gap-4"
+                            "className": "grid grid-cols-1 gap-4 md:grid-cols-2"
                           },
                           "children": [
                             {
@@ -400,7 +400,7 @@
                         {
                           "component": "$component(Box)",
                           "componentProps": {
-                            "className": "grid grid-cols-2 gap-4"
+                            "className": "grid grid-cols-1 gap-4 md:grid-cols-2"
                           },
                           "children": [
                             {
@@ -426,7 +426,7 @@
                         {
                           "component": "$component(Box)",
                           "componentProps": {
-                            "className": "grid grid-cols-2 gap-4"
+                            "className": "grid grid-cols-1 gap-4 md:grid-cols-2"
                           },
                           "children": [
                             {
@@ -462,7 +462,7 @@
                         {
                           "component": "$component(Box)",
                           "componentProps": {
-                            "className": "grid grid-cols-2 gap-4"
+                            "className": "grid grid-cols-1 gap-4 md:grid-cols-2"
                           },
                           "children": [
                             {
@@ -494,7 +494,7 @@
                         {
                           "component": "$component(Box)",
                           "componentProps": {
-                            "className": "grid grid-cols-3 gap-4"
+                            "className": "grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3"
                           },
                           "children": [
                             {
@@ -543,7 +543,7 @@
                             {
                               "component": "$component(Box)",
                               "componentProps": {
-                                "className": "grid grid-cols-2 gap-4"
+                                "className": "grid grid-cols-1 gap-4 md:grid-cols-2"
                               },
                               "children": [
                                 {
@@ -575,7 +575,7 @@
                             {
                               "component": "$component(Box)",
                               "componentProps": {
-                                "className": "grid grid-cols-3 gap-4"
+                                "className": "grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3"
                               },
                               "children": [
                                 {
@@ -665,7 +665,7 @@
                         {
                           "component": "$component(Box)",
                           "componentProps": {
-                            "className": "grid grid-cols-2 gap-4"
+                            "className": "grid grid-cols-1 gap-4 md:grid-cols-2"
                           },
                           "children": [
                             {
@@ -715,7 +715,7 @@
                             {
                               "component": "$component(Box)",
                               "componentProps": {
-                                "className": "grid grid-cols-2 gap-4"
+                                "className": "grid grid-cols-1 gap-4 md:grid-cols-2"
                               },
                               "children": [
                                 {
@@ -804,7 +804,7 @@
                         {
                           "component": "$component(Box)",
                           "componentProps": {
-                            "className": "grid grid-cols-2 gap-4"
+                            "className": "grid grid-cols-1 gap-4 md:grid-cols-2"
                           },
                           "children": [
                             {
@@ -876,7 +876,7 @@
                         {
                           "component": "$component(Box)",
                           "componentProps": {
-                            "className": "grid grid-cols-2 gap-4"
+                            "className": "grid grid-cols-1 gap-4 md:grid-cols-2"
                           },
                           "children": [
                             {
@@ -1086,7 +1086,7 @@
                                 {
                                   "component": "$component(Box)",
                                   "componentProps": {
-                                    "className": "grid grid-cols-2 gap-4"
+                                    "className": "grid grid-cols-1 gap-4 md:grid-cols-2"
                                   },
                                   "children": [
                                     {
@@ -1118,7 +1118,7 @@
                                 {
                                   "component": "$component(Box)",
                                   "componentProps": {
-                                    "className": "grid grid-cols-2 gap-4"
+                                    "className": "grid grid-cols-1 gap-4 md:grid-cols-2"
                                   },
                                   "children": [
                                     {
@@ -1197,7 +1197,7 @@
                                 {
                                   "component": "$component(Box)",
                                   "componentProps": {
-                                    "className": "grid grid-cols-3 gap-4"
+                                    "className": "grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3"
                                   },
                                   "children": [
                                     {
@@ -1241,7 +1241,7 @@
                                 {
                                   "component": "$component(Box)",
                                   "componentProps": {
-                                    "className": "grid grid-cols-2 gap-4"
+                                    "className": "grid grid-cols-1 gap-4 md:grid-cols-2"
                                   },
                                   "children": [
                                     {
@@ -1269,7 +1269,7 @@
                                 {
                                   "component": "$component(Box)",
                                   "componentProps": {
-                                    "className": "grid grid-cols-2 gap-4"
+                                    "className": "grid grid-cols-1 gap-4 md:grid-cols-2"
                                   },
                                   "children": [
                                     {
