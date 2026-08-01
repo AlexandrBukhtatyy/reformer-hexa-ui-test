@@ -27,7 +27,7 @@ import { HexaFormArray } from './HexaFormArray';
 import { HexaInput, INPUT_ADAPTER } from './HexaInput';
 import { HexaInputMask, INPUT_MASK_ADAPTER } from './HexaInputMask';
 import { HexaSection } from './HexaSection';
-import { HexaSelect, SELECT_ADAPTER } from './HexaSelect';
+import { HexaSelect } from './HexaSelect';
 import { HexaTextarea, TEXTAREA_ADAPTER } from './HexaTextarea';
 import { HexaUploader, UPLOADER_ADAPTER } from './HexaUploader';
 import { HexaWizard, HexaWizardStep } from './HexaWizard';
@@ -105,8 +105,10 @@ export const hexaRegistry = defineRegistry(registerHexaComponents);
  * одна запись обслуживает все имена-алиасы (`Radio` и `RadioGroup`), и таблица не требует
  * обновления, когда страница собирает свой реестр поверх {@link registerHexaComponents}.
  *
- * Адаптер нужен КАЖДОМУ контролу, даже value-based: без него рендерер подмешивает в контрол
- * проп `control` (ноду формы), и тот утекает в DOM.
+ * Адаптер нужен почти каждому контролу, даже value-based: без него рендерер подмешивает в контрол
+ * проп `control` (ноду формы), и тот утекает в DOM. Исключение одно — `HexaSelect`: ему нода нужна
+ * (реактивные опции из `updateComponentProps` живут на ней, а не в пропах из схемы), поэтому он
+ * принимает `control` сам и гасит лишние пропы вручную.
  */
 const FIELD_ADAPTERS = new Map<unknown, FieldAdapter>([
   [Textbox, TEXTBOX_ADAPTER],
@@ -114,7 +116,6 @@ const FIELD_ADAPTERS = new Map<unknown, FieldAdapter>([
   [HexaInput, INPUT_ADAPTER],
   [HexaInputMask, INPUT_MASK_ADAPTER],
   [HexaTextarea, TEXTAREA_ADAPTER],
-  [HexaSelect, SELECT_ADAPTER],
   [HexaCheckbox, CHECKBOX_ADAPTER],
   [HexaUploader, UPLOADER_ADAPTER],
 ]);

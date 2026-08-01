@@ -29,9 +29,13 @@ export interface HexaInputProps {
   onChange?: (value: string | number | null) => void;
   onBlur?: FocusEventHandler;
   placeholder?: string;
-  /** Границы и шаг — только для числовой ветки (в схеме иначе и не встречаются). */
+  /**
+   * Границы из схемы. Компонент их СОЗНАТЕЛЬНО игнорирует (см. числовую ветку ниже) — объявлены
+   * только для типизации: схема их передаёт, и без них проп «протёк» бы мимо контракта.
+   */
   min?: number;
   max?: number;
+  /** Шаг стрелок числового поля. */
   step?: number;
   disabled?: boolean;
   className?: string;
@@ -55,8 +59,6 @@ export function HexaInput({
   onChange,
   onBlur,
   placeholder,
-  min,
-  max,
   step,
   disabled,
   className,
@@ -71,8 +73,12 @@ export function HexaInput({
     return (
       <Textbox.Number
         {...shared}
-        min={min}
-        max={max}
+        // `min`/`max` НАМЕРЕННО не пробрасываются. У hexa-ui это не подсказка браузеру, а фильтр
+        // ввода: `useHandleKeyDown` собирает `значение + нажатая клавиша` и гасит событие, если
+        // получившийся ПРЕФИКС вне диапазона. При `min: 50000` первая же «5» не проходит (5 < 50000),
+        // и поле нельзя заполнить вообще — проверено в браузере. Диапазон и так стоит в схеме
+        // валидации (`min()`/`max()`), где он и должен жить: правило объясняет ошибку словами,
+        // а не молча съедает нажатия. `step` безвреден — он лишь шаг стрелок.
         step={step}
         // Пустое значение отдаём как `undefined`: `null` antd показал бы строкой "null".
         value={value === null || value === undefined || value === '' ? undefined : value}

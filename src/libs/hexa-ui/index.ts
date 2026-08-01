@@ -12,7 +12,7 @@
 export { HexaInput, INPUT_ADAPTER, type HexaInputProps } from './HexaInput';
 export { HexaInputMask, INPUT_MASK_ADAPTER, type HexaInputMaskProps } from './HexaInputMask';
 export { HexaTextarea, TEXTAREA_ADAPTER, type HexaTextareaProps } from './HexaTextarea';
-export { HexaSelect, SELECT_ADAPTER, type HexaSelectProps } from './HexaSelect';
+export { HexaSelect, type HexaSelectProps } from './HexaSelect';
 export { HexaCheckbox, CHECKBOX_ADAPTER, type HexaCheckboxProps } from './HexaCheckbox';
 export { HexaUploader, UPLOADER_ADAPTER, type HexaUploaderProps } from './HexaUploader';
 
