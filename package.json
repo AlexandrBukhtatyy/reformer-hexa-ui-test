@@ -8,7 +8,9 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "oxlint",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui"
   },
   "dependencies": {
     "@kaspersky/hexa-ui": "^6.387.4",
@@ -24,6 +26,7 @@
     "react-dom": "^19.2.8"
   },
   "devDependencies": {
+    "@playwright/test": "^1.62.1",
     "@reformer/builder": "^2.0.0",
     "@tailwindcss/vite": "^4.3.3",
     "@types/node": "^24.13.3",
