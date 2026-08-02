@@ -57,6 +57,75 @@ export const GENDERS: Option[] = [
   { value: "female", label: "Женский" },
 ];
 
+/**
+ * Правовые формы бизнеса. Раньше поле было текстовым с подсказкой «ИП, ООО и т.д.» — то есть
+ * список вариантов уже существовал, но жил в плейсхолдере и ничего не гарантировал.
+ */
+export const BUSINESS_TYPES: Option[] = [
+  { value: "individual", label: "Индивидуальный предприниматель" },
+  { value: "selfEmployed", label: "Самозанятый" },
+  { value: "llc", label: "ООО" },
+  { value: "jsc", label: "АО" },
+  { value: "farm", label: "КФХ" },
+];
+
+/**
+ * Регионы. Ключи совпадают с ключами `MOCK_CITIES_BY_REGION` в `api.ts` — по значению этого поля
+ * подгружаются города, и расхождение имени оставит список городов пустым. Тот же ключ читает
+ * `computeInterestRate` (надбавка 0.5 п.п. за `moscow`).
+ */
+export const REGIONS: Option[] = [
+  { value: "moscow", label: "Москва" },
+  { value: "spb", label: "Санкт-Петербург" },
+  { value: "tatarstan", label: "Республика Татарстан" },
+  { value: "novosibirsk-obl", label: "Новосибирская область" },
+  { value: "sverdlovsk-obl", label: "Свердловская область" },
+  { value: "nizhny-obl", label: "Нижегородская область" },
+  { value: "chelyabinsk-obl", label: "Челябинская область" },
+  { value: "samara-obl", label: "Самарская область" },
+  { value: "omsk-obl", label: "Омская область" },
+  { value: "rostov-obl", label: "Ростовская область" },
+];
+
+/**
+ * Марки авто. Ключи совпадают с `MOCK_CAR_MODELS` в `api.ts`: по выбранной марке подгружаются
+ * модели, и марка без записи в моке дала бы пустой список моделей.
+ */
+export const CAR_BRANDS: Option[] = [
+  { value: "bmw", label: "BMW" },
+  { value: "chery", label: "Chery" },
+  { value: "geely", label: "Geely" },
+  { value: "haval", label: "Haval" },
+  { value: "hyundai", label: "Hyundai" },
+  { value: "kia", label: "Kia" },
+  { value: "lada", label: "Lada" },
+  { value: "mazda", label: "Mazda" },
+  { value: "nissan", label: "Nissan" },
+  { value: "renault", label: "Renault" },
+  { value: "skoda", label: "Škoda" },
+  { value: "toyota", label: "Toyota" },
+  { value: "volkswagen", label: "Volkswagen" },
+];
+
+/**
+ * Банки — базовый список для поля «Банк» у существующих кредитов.
+ *
+ * Дублирует фикстуру `MOCK_DICTIONARIES.banks` СОЗНАТЕЛЬНО: справочник с сервера
+ * (`fetchDictionaries`) поведение кладёт только в ноды кредитов, которые уже были в заявке на
+ * момент загрузки, а кредит, добавленный кнопкой позже, получает опции ТОЛЬКО из схемы.
+ * Та же схема «статика в схеме + переопределение с сервера» уже действует у `properties[].type`.
+ */
+export const BANKS: Option[] = [
+  { value: "sberbank", label: "Сбербанк" },
+  { value: "vtb", label: "ВТБ" },
+  { value: "alfabank", label: "Альфа-Банк" },
+  { value: "tinkoff", label: "Тинькофф" },
+  { value: "gazprombank", label: "Газпромбанк" },
+  { value: "raiffeisen", label: "Райффайзенбанк" },
+  { value: "rosbank", label: "Росбанк" },
+  { value: "sovcombank", label: "Совкомбанк" },
+];
+
 export const EXISTING_LOAN_TYPES: Option[] = [
   { value: "consumer", label: "Потребительский кредит" },
   { value: "mortgage", label: "Ипотека" },

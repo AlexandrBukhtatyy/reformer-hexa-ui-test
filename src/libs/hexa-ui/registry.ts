@@ -59,12 +59,16 @@ import {
   UnemployedWarning,
 } from '../../pages/credit-application/components';
 import {
+  BANKS,
+  BUSINESS_TYPES,
+  CAR_BRANDS,
   EDUCATIONS,
   EMPLOYMENT_STATUSES,
   EXISTING_LOAN_TYPES,
   GENDERS,
   LOAN_TYPES,
   MARITAL_STATUSES,
+  REGIONS,
   RELATIONSHIPS,
 } from '../../pages/credit-application/constants';
 
@@ -140,6 +144,12 @@ function registerCreditApplication(reg: RegistryBuilder): void {
   reg.dataSource('GENDERS', GENDERS);
   reg.dataSource('EXISTING_LOAN_TYPES', EXISTING_LOAN_TYPES);
   reg.dataSource('RELATIONSHIPS', RELATIONSHIPS);
+  reg.dataSource('BUSINESS_TYPES', BUSINESS_TYPES);
+  reg.dataSource('REGIONS', REGIONS);
+  reg.dataSource('CAR_BRANDS', CAR_BRANDS);
+  // Базовые опции банка. Сервер переопределяет их у кредитов, уже лежавших в заявке (ui.behavior.ts);
+  // кредит, добавленный кнопкой, живёт на этом списке.
+  reg.dataSource('BANKS', BANKS);
 
   // `max` года выпуска авто. Значение, а не функция: схема кладёт его прямо в проп `max`.
   reg.dataSource('CURRENT_YEAR_PLUS_ONE', new Date().getFullYear() + 1);

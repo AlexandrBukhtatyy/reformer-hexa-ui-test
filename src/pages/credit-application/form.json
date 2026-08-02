@@ -124,10 +124,12 @@
                       "children": [
                         {
                           "value": "$model(carBrand)",
-                          "component": "$component(Textbox)",
+                          "component": "$component(Select)",
                           "componentProps": {
                             "label": "Марка автомобиля",
-                            "placeholder": "Например: Toyota"
+                            "placeholder": "Выберите марку",
+                            "options": "$dataSource(CAR_BRANDS)",
+                            "showSearch": true
                           }
                         },
                         {
@@ -135,7 +137,9 @@
                           "component": "$component(Select)",
                           "componentProps": {
                             "label": "Модель автомобиля",
-                            "placeholder": "Например: Camry"
+                            "placeholder": "Выберите модель",
+                            "showSearch": true,
+                            "notFoundContent": "Сначала выберите марку автомобиля"
                           }
                         },
                         {
@@ -470,18 +474,22 @@
                           "children": [
                             {
                               "value": "$model(registrationAddress.region)",
-                              "component": "$component(Textbox)",
+                              "component": "$component(Select)",
                               "componentProps": {
                                 "label": "Регион",
-                                "placeholder": "Введите регион"
+                                "placeholder": "Выберите регион",
+                                "options": "$dataSource(REGIONS)",
+                                "showSearch": true
                               }
                             },
                             {
                               "value": "$model(registrationAddress.city)",
-                              "component": "$component(Textbox)",
+                              "component": "$component(Select)",
                               "componentProps": {
                                 "label": "Город",
-                                "placeholder": "Введите город"
+                                "placeholder": "Выберите город",
+                                "showSearch": true,
+                                "notFoundContent": "Сначала выберите регион"
                               }
                             }
                           ]
@@ -551,18 +559,22 @@
                               "children": [
                                 {
                                   "value": "$model(residenceAddress.region)",
-                                  "component": "$component(Textbox)",
+                                  "component": "$component(Select)",
                                   "componentProps": {
                                     "label": "Регион",
-                                    "placeholder": "Введите регион"
+                                    "placeholder": "Выберите регион",
+                                    "options": "$dataSource(REGIONS)",
+                                    "showSearch": true
                                   }
                                 },
                                 {
                                   "value": "$model(residenceAddress.city)",
-                                  "component": "$component(Textbox)",
+                                  "component": "$component(Select)",
                                   "componentProps": {
                                     "label": "Город",
-                                    "placeholder": "Введите город"
+                                    "placeholder": "Выберите город",
+                                    "showSearch": true,
+                                    "notFoundContent": "Сначала выберите регион"
                                   }
                                 }
                               ]
@@ -759,10 +771,11 @@
                       "children": [
                         {
                           "value": "$model(businessType)",
-                          "component": "$component(Textbox)",
+                          "component": "$component(Select)",
                           "componentProps": {
                             "label": "Тип бизнеса",
-                            "placeholder": "ИП, ООО и т.д."
+                            "placeholder": "Выберите правовую форму",
+                            "options": "$dataSource(BUSINESS_TYPES)"
                           }
                         },
                         {
@@ -1071,10 +1084,12 @@
                               "children": [
                                 {
                                   "value": "$model(bank)",
-                                  "component": "$component(Textbox)",
+                                  "component": "$component(Select)",
                                   "componentProps": {
                                     "label": "Банк",
-                                    "placeholder": "Название банка",
+                                    "placeholder": "Выберите банк",
+                                    "options": "$dataSource(BANKS)",
+                                    "showSearch": true,
                                     "testId": "existingLoan-bank"
                                   }
                                 },

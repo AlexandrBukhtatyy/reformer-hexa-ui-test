@@ -152,9 +152,9 @@ const MOCK_APPLICATIONS: Record<string, Partial<CreditApplicationForm>> = {
 };
 
 /**
- * Города по региону. Ключ — значение поля `region`, а это в схеме обычный `Input` (текст),
- * поэтому точного попадания ждать нельзя: незнакомый регион отдаёт полный список городов
- * справочника, а не пустоту.
+ * Города по региону. Ключ — значение поля `region`, а это `Select` над справочником `REGIONS`
+ * (`constants.ts`), поэтому ключи здесь обязаны совпадать с ним один в один: регион без записи
+ * отдаст пустой список городов, и выбрать город будет нельзя.
  */
 const MOCK_CITIES_BY_REGION: Record<string, Option[]> = {
   moscow: [
@@ -172,12 +172,48 @@ const MOCK_CITIES_BY_REGION: Record<string, Option[]> = {
     { value: "naberezhnye-chelny", label: "Набережные Челны" },
     { value: "almetyevsk", label: "Альметьевск" },
   ],
+  "novosibirsk-obl": [
+    { value: "novosibirsk", label: "Новосибирск" },
+    { value: "berdsk", label: "Бердск" },
+    { value: "iskitim", label: "Искитим" },
+  ],
+  "sverdlovsk-obl": [
+    { value: "ekaterinburg", label: "Екатеринбург" },
+    { value: "nizhny-tagil", label: "Нижний Тагил" },
+    { value: "kamensk-uralsky", label: "Каменск-Уральский" },
+  ],
+  "nizhny-obl": [
+    { value: "nn", label: "Нижний Новгород" },
+    { value: "dzerzhinsk", label: "Дзержинск" },
+    { value: "arzamas", label: "Арзамас" },
+  ],
+  "chelyabinsk-obl": [
+    { value: "chelyabinsk", label: "Челябинск" },
+    { value: "magnitogorsk", label: "Магнитогорск" },
+    { value: "zlatoust", label: "Златоуст" },
+  ],
+  "samara-obl": [
+    { value: "samara", label: "Самара" },
+    { value: "tolyatti", label: "Тольятти" },
+    { value: "syzran", label: "Сызрань" },
+  ],
+  "omsk-obl": [
+    { value: "omsk", label: "Омск" },
+    { value: "tara", label: "Тара" },
+    { value: "isilkul", label: "Исилькуль" },
+  ],
+  "rostov-obl": [
+    { value: "rostov", label: "Ростов-на-Дону" },
+    { value: "taganrog", label: "Таганрог" },
+    { value: "shakhty", label: "Шахты" },
+  ],
 };
 
 /**
- * Модели по марке авто. Марка вводится текстом (`Input` с подсказкой «Например: Toyota»),
- * поэтому ключи нормализованы и продублированы кириллицей; для неизвестной марки список пуст —
- * ровно как ответил бы сервер.
+ * Модели по марке авто. Ключ — значение поля `carBrand`, а это `Select` над справочником
+ * `CAR_BRANDS` (`constants.ts`): ключи обязаны совпадать с ним, марка без записи оставит список
+ * моделей пустым. Раньше марка вводилась текстом, и здесь же жила таблица кириллических
+ * синонимов — с выбором из списка она стала недостижимой и удалена.
  */
 const MOCK_CAR_MODELS: Record<string, Option[]> = {
   toyota: [
@@ -206,17 +242,46 @@ const MOCK_CAR_MODELS: Record<string, Option[]> = {
     { value: "x5", label: "X5" },
     { value: "3-series", label: "3 series" },
   ],
-};
-
-/** Синонимы марок: пользователь пишет по-русски чаще, чем латиницей. */
-const CAR_BRAND_ALIASES: Record<string, string> = {
-  тойота: "toyota",
-  киа: "kia",
-  хендай: "hyundai",
-  хёндэ: "hyundai",
-  лада: "lada",
-  ваз: "lada",
-  бмв: "bmw",
+  volkswagen: [
+    { value: "polo", label: "Polo" },
+    { value: "tiguan", label: "Tiguan" },
+    { value: "touareg", label: "Touareg" },
+  ],
+  skoda: [
+    { value: "octavia", label: "Octavia" },
+    { value: "rapid", label: "Rapid" },
+    { value: "kodiaq", label: "Kodiaq" },
+  ],
+  nissan: [
+    { value: "qashqai", label: "Qashqai" },
+    { value: "x-trail", label: "X-Trail" },
+    { value: "almera", label: "Almera" },
+  ],
+  mazda: [
+    { value: "cx-5", label: "CX-5" },
+    { value: "mazda6", label: "Mazda 6" },
+    { value: "cx-30", label: "CX-30" },
+  ],
+  renault: [
+    { value: "duster", label: "Duster" },
+    { value: "logan", label: "Logan" },
+    { value: "sandero", label: "Sandero" },
+  ],
+  chery: [
+    { value: "tiggo-4", label: "Tiggo 4" },
+    { value: "tiggo-7-pro", label: "Tiggo 7 Pro" },
+    { value: "tiggo-8-pro", label: "Tiggo 8 Pro" },
+  ],
+  haval: [
+    { value: "jolion", label: "Jolion" },
+    { value: "f7", label: "F7" },
+    { value: "dargo", label: "Dargo" },
+  ],
+  geely: [
+    { value: "coolray", label: "Coolray" },
+    { value: "atlas", label: "Atlas" },
+    { value: "monjaro", label: "Monjaro" },
+  ],
 };
 
 const normalize = (value: string): string => value.trim().toLowerCase();
@@ -254,8 +319,10 @@ export function fetchDictionaries(
  * `GET /api/v1/cities?region={region}`
  */
 export function fetchCities(region: string): Promise<ApiResponse<Option[]>> {
-  const cities =
-    MOCK_CITIES_BY_REGION[normalize(region)] ?? MOCK_DICTIONARIES.cities;
+  // Пустой список для незнакомого региона — то, чем ответил бы сервер. Пока регион выбирается из
+  // `REGIONS`, эта ветка недостижима; раньше на её месте стоял полный справочник городов, потому
+  // что регион вводился текстом и промахнуться мимо ключа было нормой.
+  const cities = MOCK_CITIES_BY_REGION[normalize(region)] ?? [];
   return respond(cities, MOCK_DELAYS.options);
 }
 
@@ -264,8 +331,7 @@ export function fetchCities(region: string): Promise<ApiResponse<Option[]>> {
  * `GET /api/v1/car-models?brand={brand}`
  */
 export function fetchCarModels(brand: string): Promise<ApiResponse<Option[]>> {
-  const key = normalize(brand);
-  const models = MOCK_CAR_MODELS[CAR_BRAND_ALIASES[key] ?? key] ?? [];
+  const models = MOCK_CAR_MODELS[normalize(brand)] ?? [];
   return respond(models, MOCK_DELAYS.options);
 }
 

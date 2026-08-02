@@ -62,29 +62,44 @@ interface Clearable {
 }
 
 /**
- * Подгружать опции поля при изменении источника (с debounce и опциональным сбросом цели).
+ * Подгружать опции поля при изменении источника (с debounce и отбраковкой устаревшего выбора).
  *
- * Колбэк `onChange` core запускает ВНЕ effect-контекста (микротаск/таймер), поэтому писать ноды
- * (`updateComponentProps`/`reset`) отсюда безопасно — ручной `defer`/`queueMicrotask` нужен только
- * там, где `updateComponentProps` идёт в одном тике с `form.patchValue` (загрузка заявки в ui.behavior.ts),
- * иначе preact бросает «Cycle detected».
+ * Колбэк `onChange` core запускает ВНЕ effect-контекста (микротаск/таймер), поэтому и писать ноды
+ * (`updateComponentProps`/`reset`), и ЧИТАТЬ сигнал `selected` отсюда безопасно: подписки не
+ * возникает. Ручной `defer`/`queueMicrotask` нужен только там, где `updateComponentProps` идёт в
+ * одном тике с `form.patchValue` (загрузка заявки в ui.behavior.ts), иначе preact бросает
+ * «Cycle detected».
+ *
+ * `selected` — сигнал значения САМОЙ цели. Пока цель была текстовым полем, рассинхрон никого не
+ * волновал; у `Select` выбор, которого нет в новом списке, остался бы висеть в поле (rc-select
+ * рисует «сырое» значение) и молча прошёл бы `required`. Сбрасываем такой выбор, а совпавший
+ * оставляем — иначе черновик заявки терял бы город: `patchValue` кладёт регион и город в одном
+ * тике, а этот колбэк приходит на 300 мс позже и затёр бы уже проставленное значение.
  *
  * @example
- * loadOptionsOn(model.$.carBrand, form.carModel, fetchCarModels, { resetTarget: true });
+ * loadOptionsOn(model.$.carBrand, form.carModel, fetchCarModels, { selected: model.$.carModel });
  */
-export function loadOptionsOn<TValue, TOption>(
+export function loadOptionsOn<TValue, TOption extends { value: string }>(
   source: ReadonlySignal<TValue>,
   target: OptionsTarget,
   fetcher: (value: TValue) => Promise<{ data: TOption[] }>,
-  options: { debounce?: number; resetTarget?: boolean } = {},
+  options: { debounce?: number; selected?: ReadonlySignal<string> } = {},
 ): void {
-  const { debounce = 300, resetTarget = false } = options;
+  const { debounce = 300, selected } = options;
+
+  const applyOptions = (list: TOption[]): void => {
+    target.updateComponentProps({ options: list });
+    const current = selected?.value;
+    if (current && !list.some((option) => option.value === current)) {
+      target.reset();
+    }
+  };
+
   onChange(
     source,
     async (value, { signal }) => {
-      if (resetTarget) target.reset();
       if (!value) {
-        target.updateComponentProps({ options: [] });
+        applyOptions([]);
         return;
       }
       try {
@@ -92,10 +107,10 @@ export function loadOptionsOn<TValue, TOption>(
         // Пока ждали ответ, источник мог смениться — core аннулирует signal предыдущего вызова.
         // Без этой проверки поздний ответ по старому значению перетирает актуальные опции.
         if (signal.aborted) return;
-        target.updateComponentProps({ options: data });
+        applyOptions(data);
       } catch {
         if (signal.aborted) return;
-        target.updateComponentProps({ options: [] });
+        applyOptions([]);
       }
     },
     { debounce },
@@ -118,9 +133,11 @@ export function clearWhenOff(
 
 export const addressBehavior = defineFormBehavior<Address>(
   ({ model, form }) => {
-    // Подгрузка городов по региону. Город НЕ сбрасываем (region выставляется раньше city при загрузке;
-    // поле «Город» — обычный Input, список носит вспомогательный характер).
-    loadOptionsOn(model.$.region, form.city, fetchCities);
+    // Подгрузка городов по региону. Оба поля — `Select`, поэтому список городов не вспомогательный,
+    // а единственный источник значения: `selected` снимает выбор, не переживший смену региона.
+    loadOptionsOn(model.$.region, form.city, fetchCities, {
+      selected: model.$.city,
+    });
 
     // Автоформат почтового индекса (только цифры, ≤ 6).
     transformValue(model.$.postalCode, (pc) =>
@@ -231,7 +248,7 @@ export const creditApplicationBehavior =
     // 4. Реакции — загрузка справочников / лимиты / очистка массивов
     // ===================================================================
     loadOptionsOn(model.$.carBrand, form.carModel, fetchCarModels, {
-      resetTarget: true,
+      selected: model.$.carModel,
     });
 
     // Максимальная сумма кредита от дохода (≤ 10 годовых, не более 10 млн).

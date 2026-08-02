@@ -270,16 +270,11 @@ const smsCode: AsyncRule<string> = async (value) => {
 
 /** Под-схема адреса — функция над FormModel<Address> (reuse прямым вызовом). */
 const addressSchema: ValidationSchema<Address> = ({ model }) => {
-  validate(model.$.region, [
-    required({ message: "Укажите регион" }),
-    minLength(2, { message: "Минимум 2 символа" }),
-    maxLength(100, { message: "Максимум 100 символов" }),
-  ]);
-  validate(model.$.city, [
-    required({ message: "Укажите город" }),
-    minLength(2, { message: "Минимум 2 символа" }),
-    maxLength(100, { message: "Максимум 100 символов" }),
-  ]);
+  // Регион и город — Select над справочником: значение либо код из списка, либо пусто. Правила
+  // длины, оставшиеся от текстовых полей, тут недостижимы, а их текст («Минимум 2 символа»)
+  // предлагал бы дописать символы в поле, куда нельзя печатать.
+  validate(model.$.region, [required({ message: "Выберите регион" })]);
+  validate(model.$.city, [required({ message: "Выберите город" })]);
   validate(model.$.street, [
     required({ message: "Укажите улицу" }),
     minLength(3, { message: "Минимум 3 символа" }),
@@ -314,11 +309,7 @@ const propertyItem = (im: FormModel<Property>): void => {
 
 const existingLoanItem = (im: FormModel<ExistingLoan>): void => {
   const loan = im.get();
-  validate(im.$.bank, [
-    required({ message: "Укажите название банка" }),
-    minLength(3, { message: "Минимум 3 символа" }),
-    maxLength(100, { message: "Максимум 100 символов" }),
-  ]);
+  validate(im.$.bank, [required({ message: "Выберите банк" })]);
   validate(im.$.type, [required({ message: "Укажите тип кредита" })]);
   validate(im.$.amount, [
     required({ message: "Укажите сумму кредита" }),
@@ -408,14 +399,10 @@ const step1 = defineValidationSchema<Root>(({ model }) => {
     () => model.loanType === "car",
     () => {
       validate(model.$.carBrand, [
-        required({ message: "Укажите марку автомобиля" }),
-        minLength(2, { message: "Минимум 2 символа" }),
-        maxLength(50, { message: "Максимум 50 символов" }),
+        required({ message: "Выберите марку автомобиля" }),
       ]);
       validate(model.$.carModel, [
-        required({ message: "Укажите модель автомобиля" }),
-        minLength(1, { message: "Минимум 1 символ" }),
-        maxLength(50, { message: "Максимум 50 символов" }),
+        required({ message: "Выберите модель автомобиля" }),
       ]);
       validate(model.$.carYear, [
         required({ message: "Укажите год выпуска" }),
@@ -554,7 +541,7 @@ const step4 = defineValidationSchema<Root>(({ model }) => {
     () => model.employmentStatus === "selfEmployed",
     () => {
       validate(model.$.businessType, [
-        required({ message: "Укажите тип бизнеса" }),
+        required({ message: "Выберите тип бизнеса" }),
       ]);
       validate(model.$.businessInn, [
         required({ message: "ИНН ИП обязателен" }),

@@ -24,9 +24,30 @@ import { Select } from '@kaspersky/hexa-ui';
 import type { SelectProps } from '@kaspersky/hexa-ui';
 import { useFormControl, type FieldNode } from '@reformer/core';
 
+/**
+ * Фильтр поиска. Свой, а не встроенный: rc-select по умолчанию ищет по `value`, а там лежат коды
+ * (`moscow`, `sberbank`, `toyota`) — набранное «Моск» не нашло бы ничего. Штатная альтернатива
+ * `optionFilterProp: 'label'` работает только пока label — строка; функция переживёт и ReactNode.
+ */
+const filterByLabel = (input: string, option?: { label?: unknown }): boolean =>
+  String(option?.label ?? '')
+    .toLowerCase()
+    .includes(input.trim().toLowerCase());
+
 export interface HexaSelectProps {
   /** Опции из схемы: литералом либо через `$dataSource(...)`. */
   options?: SelectProps['options'];
+  /**
+   * Поиск по списку — то, что превращает выпадающий список в комбобокс.
+   * Включается точечно из схемы: коротким перечислениям строка поиска только мешает,
+   * а на мобильных ещё и поднимает клавиатуру на каждое открытие.
+   */
+  showSearch?: boolean;
+  /**
+   * Текст пустого списка. Нужен полям с рантайм-опциями: пока источник не выбран, опций нет,
+   * и дефолтное «No data» ничего не объясняет («Сначала выберите марку» — объясняет).
+   */
+  notFoundContent?: SelectProps['notFoundContent'];
   value?: string | null;
   /** Рендерер даёт value-based seam; второй аргумент hexa-ui (`option`) колбэк отбрасывает сам. */
   onChange?: (value: string | null) => void;
@@ -47,6 +68,8 @@ export interface HexaSelectProps {
 /** Часть без ноды формы: чистый контрол на пропах. */
 function PlainSelect({
   options,
+  showSearch,
+  notFoundContent,
   value,
   onChange,
   onBlur,
@@ -59,6 +82,11 @@ function PlainSelect({
   return (
     <Select
       options={options}
+      showSearch={showSearch}
+      // Фильтр ставим только вместе с поиском: без `showSearch` он мёртв, а лишний проп у antd
+      // имеет шанс уехать в DOM.
+      filterOption={showSearch ? (filterByLabel as SelectProps['filterOption']) : undefined}
+      notFoundContent={notFoundContent}
       // `''` → `null`: иначе в поле висит пустой «выбранный» пункт вместо placeholder.
       // Каст нужен из-за типов hexa-ui: `null` они не объявляют, хотя rc-select именно его
       // трактует как «показать placeholder» (а на `undefined` подставляет свой прошлый выбор).
